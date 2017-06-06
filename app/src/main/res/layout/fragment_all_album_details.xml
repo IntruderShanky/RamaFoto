@@ -3,15 +3,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/color3"
+    android:background="@drawable/app_bg"
     tools:context="com.islabs.photobook.Fragments.AllAlbumDetails">
-
-    <com.intrusoft.squint.DiagonalView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginBottom="80dp"
-        app:angle="16"
-        app:solidColor="@color/colorPrimary" />
 
     <TextView
         android:id="@+id/add_album_info"

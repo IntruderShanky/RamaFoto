@@ -9,10 +9,15 @@
 
     <color name="colorPrimary">#121212</color>
     <color name="colorPrimaryDark">#0D0D0D</color>
-    <color name="colorAccent">#73192A</color>
+    <color name="colorAccent">#ffffff</color>
     <color name="twitter">#55acee</color>
     <color name="github">#0D2636</color>
     <color name="white">#ffffff</color>
+
+    <color name="dialog_back">#106875</color>
+
+    <color name="card_back">#99000000</color>
+    <color name="textColor">#aa000000</color>
 
 
     <color name="icon_color">#aa000000</color>
@@ -26,13 +31,13 @@
     <color name="color2">#A62139</color>
     <color name="color3">#D9D9D9</color>
     <color name="color4">#0D0D0D</color>
-    <color name="color5">#73192A</color>
+    <color name="color5">#ffffff</color>
 
     <color name="yellow">#fad018</color>
 
     <!-- Theme -->
     <color name="cherry_pie">#342B50</color>
-    <color name="deluge">#897CA2</color>
+    <color name="deluge">#FF12353C</color>
     <color name="medium_purple">#A876EF</color>
     <color name="slate_blue">#7D4ECE</color>
     <color name="prim">#DCD5D9</color>

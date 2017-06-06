@@ -16,4 +16,6 @@ public interface PagerCallback {
     void viewAlbum(String albumPin);
     void getAlbum(String pin);
 
+    void showMessage(String message);
+
 }

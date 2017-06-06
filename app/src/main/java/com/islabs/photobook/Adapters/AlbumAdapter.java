@@ -78,10 +78,8 @@ public class AlbumAdapter extends RecyclerView.Adapter<AlbumAdapter.ViewHolder> 
     public boolean onItemMove(int fromPosition, int toPosition) {
         helper.open();
         cursor.moveToPosition(fromPosition);
-        helper.setIndex(cursor.getString(cursor.getColumnIndex(DatabaseHelper.ALBUM_ID)), toPosition);
-        cursor.moveToPosition(toPosition);
-        helper.setIndex(cursor.getString(cursor.getColumnIndex(DatabaseHelper.ALBUM_ID)), fromPosition);
-        // cursor = helper.getAllAlbums();
+        helper.setIndex(cursor.getString(cursor.getColumnIndex(DatabaseHelper.ALBUM_ID)), toPosition, fromPosition);
+        cursor = helper.getAllAlbums();
         notifyItemMoved(fromPosition, toPosition);
         return true;
     }

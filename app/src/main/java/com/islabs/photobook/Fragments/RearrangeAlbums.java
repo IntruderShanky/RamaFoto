@@ -65,6 +65,7 @@ public class RearrangeAlbums extends Fragment implements OnStartDragListener {
         helper.open();
         if (context instanceof AllAlbumsCallback) {
             callback = (AllAlbumsCallback) context;
+            callback.onAttachToHome(true);
         } else {
             throw new RuntimeException(context.toString()
                     + " must implement AllAlbumsCallback");
@@ -74,6 +75,7 @@ public class RearrangeAlbums extends Fragment implements OnStartDragListener {
     @Override
     public void onDetach() {
         super.onDetach();
+        callback.onAttachToHome(false);
         callback = null;
         helper.close();
     }
@@ -90,5 +92,7 @@ public class RearrangeAlbums extends Fragment implements OnStartDragListener {
 
     public interface AllAlbumsCallback {
         void setToolbarTitle(String title, String subTitle);
+
+        void onAttachToHome(boolean attach);
     }
 }

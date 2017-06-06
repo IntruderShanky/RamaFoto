@@ -4,6 +4,7 @@
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
+        <item name="alertDialogTheme">@style/ProgressDialogTheme</item>
     </style>
 
     <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
@@ -12,6 +13,13 @@
 
     <style name="AlbumViewTheme" parent="AppTheme">
         <item name="colorPrimaryDark">#88000000</item>
+    </style>
+
+    <style name="ProgressDialogTheme" parent="Theme.AppCompat.Dialog.Alert">
+        <item name="colorAccent">@color/white</item>
+        <item name="colorPrimary">@color/white</item>
+        <item name="android:windowBackground">@color/dialog_back</item>
+        <item name="colorPrimaryDark">@color/white</item>
     </style>
 
 </resources>

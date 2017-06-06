@@ -53,6 +53,7 @@ public class ContactUs extends Fragment {
         ButterKnife.bind(this, view);
         subject.setAdapter(new ArrayAdapter<>(getContext(), R.layout.user_view, R.id.user, subjects));
         subject.setSelection(0);
+        System.out.println("Create view contact us");
         callback.setToolbarTitle("Contact Us", "");
         return view;
 
@@ -63,15 +64,17 @@ public class ContactUs extends Fragment {
         super.onAttach(context);
         if (context instanceof ContactUsCallback) {
             callback = (ContactUsCallback) context;
+            callback.onAttachToHome(true);
         } else {
             throw new RuntimeException(context.toString()
-                    + " must implement ContactUsCallback");
+                    + " must implement FAQsCallback");
         }
     }
 
     @Override
     public void onDetach() {
         super.onDetach();
+        callback.onAttachToHome(false);
         callback = null;
     }
 
@@ -83,5 +86,7 @@ public class ContactUs extends Fragment {
         void contactUs(String message, String subject);
 
         void setToolbarTitle(String s, String s1);
+
+        void onAttachToHome(boolean attach);
     }
 }

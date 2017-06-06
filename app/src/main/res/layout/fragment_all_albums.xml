@@ -1,7 +1,7 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:background="@color/white"
+    android:background="@drawable/app_bg"
     android:layout_height="match_parent"
     tools:context="com.islabs.photobook.Fragments.RearrangeAlbums">
     
@@ -12,6 +12,11 @@
         android:layout_gravity="bottom"
         android:layout_marginBottom="30dp"
         android:gravity="center"
+        android:textColor="@color/white"
+        android:textStyle="bold"
+        android:shadowDy="5"
+        android:shadowDx="5"
+        android:shadowColor="#000000"
         android:text="Press and Move the Album to\n Set the Position"/>
 
     <android.support.v7.widget.RecyclerView

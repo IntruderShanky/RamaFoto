@@ -2,13 +2,11 @@ package com.islabs.photobook.Activity;
 
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.database.Cursor;
-import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -26,32 +24,29 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.request.animation.GlideAnimation;
-import com.bumptech.glide.request.target.SimpleTarget;
 import com.intrusoft.milano.Milano;
 import com.intrusoft.milano.OnRequestComplete;
+import com.islabs.photobook.Fragments.AboutUs;
 import com.islabs.photobook.Fragments.AddNewAlbum;
 import com.islabs.photobook.Fragments.AllAlbumDetails;
 import com.islabs.photobook.Fragments.ContactUs;
+import com.islabs.photobook.Fragments.FAQs;
 import com.islabs.photobook.Fragments.RearrangeAlbums;
 import com.islabs.photobook.Helper.DatabaseHelper;
 import com.islabs.photobook.R;
 import com.islabs.photobook.Services.DownloadService;
 import com.islabs.photobook.Utils.StaticData;
 
-import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
-
-import java.io.ByteArrayOutputStream;
 
 public class HomeActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener,
         AddNewAlbum.NewAlbumCallback,
         RearrangeAlbums.AllAlbumsCallback,
         AllAlbumDetails.AllAlbumsDetailsCallback,
-        ContactUs.ContactUsCallback {
+        ContactUs.ContactUsCallback,
+        AboutUs.AboutUsCallback,
+        FAQs.FAQsCallback {
 
     private CoordinatorLayout rootLayout;
     private Milano.Builder milanoBuilder;
@@ -62,6 +57,8 @@ public class HomeActivity extends AppCompatActivity
     private AllAlbumDetails allAlbumDetails;
     private ContactUs contactUs;
     private Toolbar toolbar;
+    private FAQs faQs;
+    private AboutUs aboutUs;
     private FloatingActionButton fab;
     private static final String HOME_STACK = "home_stack";
     private static final String REARRANGE_STACK = "rearrange_stack";
@@ -80,18 +77,20 @@ public class HomeActivity extends AppCompatActivity
         helper = new DatabaseHelper(this);
         preferences = getSharedPreferences(StaticData.PREF, MODE_PRIVATE);
         helper.open();
-        progressDialog = new ProgressDialog(this);
+        progressDialog = new ProgressDialog(this, R.style.ProgressDialogTheme);
         rearrangeAlbums = new RearrangeAlbums();
         allAlbumDetails = new AllAlbumDetails();
         addNewAlbum = new AddNewAlbum();
         contactUs = new ContactUs();
+        faQs = new FAQs();
+        aboutUs = new AboutUs();
         fab = (FloatingActionButton) findViewById(R.id.add_new_album);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 if (inStack(ADD_NEW_STACK))
                     getSupportFragmentManager().beginTransaction()
-                            .replace(R.id.conatiner, addNewAlbum)
+                            .replace(R.id.container, addNewAlbum)
                             .addToBackStack(ADD_NEW_STACK)
                             .commit();
             }
@@ -111,7 +110,7 @@ public class HomeActivity extends AppCompatActivity
         userName.setText(preferences.getString("name", "Guest"));
         mobile.setText(preferences.getString("mobile", ""));
         navigationView.setNavigationItemSelectedListener(this);
-        getSupportFragmentManager().beginTransaction().add(R.id.conatiner, allAlbumDetails, HOME_STACK).commit();
+        getSupportFragmentManager().beginTransaction().add(R.id.container, allAlbumDetails, HOME_STACK).commit();
     }
 
     @Override
@@ -143,14 +142,14 @@ public class HomeActivity extends AppCompatActivity
             case R.id.rearrange_albums:
                 if (inStack(REARRANGE_STACK))
                     getSupportFragmentManager().beginTransaction()
-                            .replace(R.id.conatiner, rearrangeAlbums)
+                            .replace(R.id.container, rearrangeAlbums)
                             .addToBackStack(REARRANGE_STACK)
                             .commit();
                 break;
             case R.id.contact_us:
                 if (inStack(CONTACT_US_STACK))
                     getSupportFragmentManager().beginTransaction()
-                            .replace(R.id.conatiner, contactUs)
+                            .replace(R.id.container, contactUs)
                             .addToBackStack(CONTACT_US_STACK)
                             .commit();
                 break;
@@ -159,6 +158,20 @@ public class HomeActivity extends AppCompatActivity
                 break;
             case R.id.add_new:
                 fab.performClick();
+                break;
+            case R.id.f_a_q:
+                if (inStack("FAQ"))
+                    getSupportFragmentManager().beginTransaction()
+                            .replace(R.id.container, faQs)
+                            .addToBackStack("FAQs")
+                            .commit();
+                break;
+            case R.id.about_us:
+                if (inStack("ABOUT US"))
+                    getSupportFragmentManager().beginTransaction()
+                            .replace(R.id.container, aboutUs)
+                            .addToBackStack("ABOUT_US")
+                            .commit();
                 break;
 //            case R.id.log_out:
 //                AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -186,11 +199,11 @@ public class HomeActivity extends AppCompatActivity
     private boolean inStack(String stackEntry) {
         boolean inStack = true;
         for (int i = 0; i < getSupportFragmentManager().getBackStackEntryCount(); i++) {
-//            System.out.println(getSupportFragmentManager().getBackStackEntryAt(i).getName());
-//            if (getSupportFragmentManager().getBackStackEntryAt(i).getName().equals(stackEntry)) {
-                getSupportFragmentManager().popBackStack();
-//                inStack = false;
-//            }
+            if (getSupportFragmentManager().getBackStackEntryAt(i).getName().equals(stackEntry)) {
+                inStack = false;
+                break;
+            }
+            getSupportFragmentManager().popBackStack();
         }
         return inStack;
     }
@@ -289,10 +302,10 @@ public class HomeActivity extends AppCompatActivity
                 .execute(new OnRequestComplete() {
                     @Override
                     public void onSuccess(String response, int responseCode) {
-                        try{
+                        try {
                             JSONObject object = new JSONObject(response);
                             showActionMessage(object.getString("message"));
-                        }catch (Exception e){
+                        } catch (Exception e) {
                             e.printStackTrace();
                         }
                         onBackPressed();
@@ -307,6 +320,7 @@ public class HomeActivity extends AppCompatActivity
 
     @Override
     public void setToolbarTitle(String title, String subTitle) {
+        System.out.println(title);
         getSupportActionBar().setTitle(title);
         getSupportActionBar().setSubtitle(subTitle);
     }
@@ -322,7 +336,7 @@ public class HomeActivity extends AppCompatActivity
     public void addNewAlbum() {
         if (inStack(ADD_NEW_STACK))
             getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.conatiner, addNewAlbum)
+                    .replace(R.id.container, addNewAlbum)
                     .commit();
     }
 
@@ -344,7 +358,10 @@ public class HomeActivity extends AppCompatActivity
                     showMessage("Album Downloaded");
                     try {
                         inStack(HOME_STACK);
-                        getSupportFragmentManager().beginTransaction().replace(R.id.conatiner, allAlbumDetails, HOME_STACK).commit();
+                        getSupportFragmentManager()
+                                .beginTransaction()
+                                .replace(R.id.container, allAlbumDetails, HOME_STACK)
+                                .commit();
                     } catch (Exception e) {
                         e.printStackTrace();
                     }

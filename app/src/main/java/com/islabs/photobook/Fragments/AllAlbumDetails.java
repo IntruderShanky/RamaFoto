@@ -49,15 +49,9 @@ public class AllAlbumDetails extends Fragment implements PagerCallback {
         View view = inflater.inflate(R.layout.fragment_all_album_details, container, false);
         albumsPager = (ViewPager) view.findViewById(R.id.all_albums_pager);
         addNewInfo = (TextView) view.findViewById(R.id.add_album_info);
-        Cursor cursor = helper.getAllAlbums();
-        callback.setToolbarTitle("My Albums", cursor.getCount() + " Albums");
-        adapter = new AlbumPagerAdapter(getContext(), cursor, this);
-        albumsPager.setAdapter(adapter);
         albumsPager.setPageMargin(30);
         albumsPager.setPageTransformer(false, new StackTransformer(getContext()));
         albumsPager.setOffscreenPageLimit(3);
-        if (cursor.getCount() == 0)
-            callback.addNewAlbum();
         return view;
     }
 
@@ -83,6 +77,7 @@ public class AllAlbumDetails extends Fragment implements PagerCallback {
     }
 
     private void refreshPager() {
+        System.out.println("in refress");
         Cursor cursor = helper.getAllAlbums();
         adapter = new AlbumPagerAdapter(getContext(), cursor, AllAlbumDetails.this);
         albumsPager.setAdapter(adapter);
@@ -153,6 +148,11 @@ public class AllAlbumDetails extends Fragment implements PagerCallback {
         callback.getAlbum(pin);
     }
 
+    @Override
+    public void showMessage(String message) {
+        callback.showMessage(message);
+    }
+
     public interface AllAlbumsDetailsCallback {
         void setToolbarTitle(String title, String subTitle);
 
@@ -161,6 +161,8 @@ public class AllAlbumDetails extends Fragment implements PagerCallback {
         void addNewAlbum();
 
         void getAlbum(String pin);
+
+        void showMessage(String s);
     }
 
 }

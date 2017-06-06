@@ -8,7 +8,6 @@ import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.support.v4.view.PagerAdapter;
 import android.support.v7.app.AlertDialog;
-import android.support.v7.widget.CardView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,6 +17,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.intrusoft.milano.Milano;
@@ -25,6 +25,7 @@ import com.intrusoft.milano.OnRequestComplete;
 import com.islabs.photobook.Callbacks.PagerCallback;
 import com.islabs.photobook.Helper.DatabaseHelper;
 import com.islabs.photobook.R;
+import com.islabs.photobook.Utils.NetworkConnection;
 import com.islabs.photobook.Utils.StaticData;
 
 import org.json.JSONArray;
@@ -157,47 +158,55 @@ public class AlbumPagerAdapter extends PagerAdapter {
                 context.startActivity(intent);
             }
         });
-        Milano.with(context).fromURL(uri.toString()).doGet().execute(new OnRequestComplete() {
-            @Override
-            public void onSuccess(String response, int responseCode) {
-                try {
-                    JSONObject object = new JSONObject(response);
-                    int count = object.getInt("count");
-                    viewCount.setText(String.format(Locale.getDefault(), "%d", count));
-                    helper.updateViewCount(albumPin, count);
-                    if (object.getInt("version") != cursor.getInt(cursor.getColumnIndex(DatabaseHelper.ALBUM_VERSION))) {
-                        missing_error.setVisibility(View.VISIBLE);
-                        missing_error.setText("Album update available..");
-                        downloadAgain.setVisibility(View.VISIBLE);
-                        downloadAgain.setText("Update Album");
+        if (NetworkConnection.isConnected(context))
+            Milano.with(context).fromURL(uri.toString()).doGet().execute(new OnRequestComplete() {
+                @Override
+                public void onSuccess(String response, int responseCode) {
+                    try {
+                        JSONObject object = new JSONObject(response);
+                        int count = object.getInt("count");
+                        viewCount.setText(String.format(Locale.getDefault(), "%d", count));
+                        helper.updateViewCount(albumPin, count);
+                        if (object.getInt("version") != cursor.getInt(cursor.getColumnIndex(DatabaseHelper.ALBUM_VERSION))) {
+                            missing_error.setVisibility(View.VISIBLE);
+                            missing_error.setText("Album update available..");
+                            downloadAgain.setVisibility(View.VISIBLE);
+                            downloadAgain.setText("Update Album");
+                        }
+                        JSONArray users = object.getJSONArray("users");
+                        final String[] userss = new String[users.length()];
+                        for (int j = 0; j < users.length(); j++)
+                            userss[j] = users.getString(j);
+                        if (users.length() > 0)
+                            viewCount.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    AlertDialog.Builder builder = new AlertDialog.Builder(context);
+                                    builder.setTitle("Views");
+                                    builder.setPositiveButton("Cancel", null);
+                                    ListView listView = new ListView(context);
+                                    listView.setAdapter(new ArrayAdapter<>(context, R.layout.user_view, R.id.user, userss));
+                                    builder.setView(listView);
+                                    builder.show();
+                                }
+                            });
+                    } catch (JSONException e) {
+                        e.printStackTrace();
                     }
-                    JSONArray users = object.getJSONArray("users");
-                    final String[] userss = new String[users.length()];
-                    for (int j = 0; j < users.length(); j++)
-                        userss[j] = users.getString(j);
-                    if (users.length() > 0)
-                        viewCount.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                AlertDialog.Builder builder = new AlertDialog.Builder(context);
-                                builder.setTitle("Views");
-                                builder.setPositiveButton("Cancel", null);
-                                ListView listView = new ListView(context);
-                                listView.setAdapter(new ArrayAdapter<>(context, R.layout.user_view, R.id.user, userss));
-                                builder.setView(listView);
-                                builder.show();
-                            }
-                        });
-                } catch (JSONException e) {
-                    e.printStackTrace();
                 }
-            }
 
-            @Override
-            public void onError(String error, int errorCode) {
+                @Override
+                public void onError(String error, int errorCode) {
 
-            }
-        });
+                }
+            });
+        else
+            viewCount.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    pagerCallback.showMessage("Internet connection unavailable.");
+                }
+            });
 
         if (helper.getImagesOfAlbum(albumPin).getCount() != cursor.getInt(cursor.getColumnIndex(DatabaseHelper.NUM_IMAGES))) {
             missing_error.setVisibility(View.VISIBLE);

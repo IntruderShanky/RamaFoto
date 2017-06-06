@@ -99,8 +99,15 @@ public class DatabaseHelper {
         database.execSQL("update " + ALBUM_DETAILS + " set " + INDEX + " = " + INDEX + " - 1 where " + INDEX + ">" + index + ";");
     }
 
-    public void setIndex(String albumPin, int index) {
-        database.execSQL("update " + ALBUM_DETAILS + " set " + INDEX + " = " + index + " where " + ALBUM_ID + "=" + albumPin + ";");
+    public void setIndex(String albumPin, int to, int from) {
+        if (to < from)
+            database.execSQL("update " + ALBUM_DETAILS +
+                    " set " + INDEX + " = " + INDEX + " + 1 where "
+                    + INDEX + ">=" + to + " and " + INDEX + "<" + from + ";");
+        else database.execSQL("update " + ALBUM_DETAILS +
+                " set " + INDEX + " = " + INDEX + " - 1 where "
+                + INDEX + "<=" + to + " and " + INDEX + "> " + from + ";");
+        database.execSQL("update " + ALBUM_DETAILS + " set " + INDEX + " = " + to + " where " + ALBUM_ID + "=" + albumPin + ";");
     }
 
     public void resetAlbums() {
