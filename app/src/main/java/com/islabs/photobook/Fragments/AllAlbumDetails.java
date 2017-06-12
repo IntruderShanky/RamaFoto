@@ -25,6 +25,7 @@ import com.islabs.photobook.Callbacks.PagerCallback;
 import com.islabs.photobook.Helper.DatabaseHelper;
 import com.islabs.photobook.R;
 import com.islabs.photobook.Transformers.StackTransformer;
+import com.islabs.photobook.Utils.NetworkConnection;
 import com.islabs.photobook.Utils.StaticData;
 
 public class AllAlbumDetails extends Fragment implements PagerCallback {
@@ -144,8 +145,12 @@ public class AllAlbumDetails extends Fragment implements PagerCallback {
 
     @Override
     public void getAlbum(String pin) {
-        helper.deleteAlbum(pin);
-        callback.getAlbum(pin);
+        if (NetworkConnection.isConnected(getContext())) {
+            helper.deleteAlbum(pin);
+            refreshPager();
+            callback.getAlbum(pin);
+        } else
+            callback.showMessage("Internet connection unavailable..");
     }
 
     @Override

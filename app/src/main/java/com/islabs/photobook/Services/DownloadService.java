@@ -25,7 +25,7 @@ public class DownloadService extends IntentService {
     String pin;
 
     public DownloadService() {
-        super("download_service");
+        super(":download_service");
     }
 
     @Override
@@ -110,6 +110,8 @@ public class DownloadService extends IntentService {
             } else {
                 JSONArray photos = (JSONArray) data;
                 for (final int[] i = {0}; i[0] < photos.length(); i[0]++) {
+                    if (getSharedPreferences("BACKGROUND", MODE_PRIVATE).getBoolean("stop_service", false))
+                        break;
                     JSONObject photo = photos.getJSONObject(i[0]);
                     Bitmap resource = Glide.with(this).load(photo.getString("src")).asBitmap()
                             .listener(new RequestListener<String, Bitmap>() {
@@ -143,17 +145,24 @@ public class DownloadService extends IntentService {
         }
     }
 
-
     @Override
     public void onCreate() {
         super.onCreate();
+        System.out.println("On Create Service");
         helper = new DatabaseHelper(this);
         helper.open();
     }
 
     @Override
+    public void onRebind(Intent intent) {
+        super.onRebind(intent);
+        System.out.println("on Rebind service");
+    }
+
+    @Override
     public void onDestroy() {
         super.onDestroy();
+        System.out.println("On Destroy Service");
         helper.close();
     }
 
@@ -163,7 +172,9 @@ public class DownloadService extends IntentService {
         intent.putExtra("completed", completed);
         intent.putExtra("pin", pin);
         LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
-        if (progress == -1)
-            stopSelf();
+        if (progress == -1) {
+            System.out.println("Stopping Service");
+            getSharedPreferences("BACKGROUND", MODE_PRIVATE).edit().putBoolean("stop_service", true).apply();
+        }
     }
 }

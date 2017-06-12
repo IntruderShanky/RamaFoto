@@ -236,10 +236,17 @@ public class HomeActivity extends AppCompatActivity
                         progressDialog.setMax(100);
                         progressDialog.setCancelable(false);
                         progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+                        progressDialog.setButton(DialogInterface.BUTTON_NEGATIVE, "Cancel", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                getSharedPreferences("BACKGROUND", MODE_PRIVATE).edit().putBoolean("stop_service", true).apply();
+                            }
+                        });
                         progressDialog.show();
                         Intent downloadIntent = new Intent(HomeActivity.this, DownloadService.class);
                         downloadIntent.putExtra("json", response);
                         downloadIntent.putExtra("pin", pin);
+                        getSharedPreferences("BACKGROUND", MODE_PRIVATE).edit().putBoolean("stop_service", false).apply();
                         HomeActivity.this.startService(downloadIntent);
                         IntentFilter statusIntentFilter = new IntentFilter(
                                 StaticData.BROADCAST_ACTION);
@@ -255,7 +262,7 @@ public class HomeActivity extends AppCompatActivity
 
             @Override
             public void onError(String error, int errorCode) {
-
+                showMessage("Network error");
             }
         });
     }
@@ -360,7 +367,7 @@ public class HomeActivity extends AppCompatActivity
                             if (NetworkConnection.isConnected(HomeActivity.this)) {
                                 helper.deleteAlbum(pin);
                                 getAlbum(pin);
-                            }else{
+                            } else {
                                 showMessage("Internet connection unavailable..");
                             }
                         }
@@ -385,8 +392,9 @@ public class HomeActivity extends AppCompatActivity
                 System.out.println("Progress in receiver " + progress);
                 progressDialog.setProgress(progress);
                 if (intent.getBooleanExtra("completed", false)) {
+                    if (!getSharedPreferences("BACKGROUND", MODE_PRIVATE).getBoolean("stop_service", false))
+                        showMessage("Album Downloaded");
                     progressDialog.dismiss();
-                    showMessage("Album Downloaded");
                     try {
                         inStack(HOME_STACK);
                         getSupportFragmentManager()

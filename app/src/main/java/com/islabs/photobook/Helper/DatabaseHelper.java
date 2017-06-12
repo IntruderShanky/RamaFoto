@@ -64,7 +64,11 @@ public class DatabaseHelper {
     }
 
     public void insertAlbum(String tableName, ContentValues contentValues) {
-        database.insert(tableName, null, contentValues);
+        try {
+            database.insert(tableName, null, contentValues);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
     }
 
     public void updateRecentAlbum(long date, String albumId) {
