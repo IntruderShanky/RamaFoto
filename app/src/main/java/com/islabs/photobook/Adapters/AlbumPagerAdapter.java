@@ -17,7 +17,6 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.intrusoft.milano.Milano;
@@ -167,7 +166,11 @@ public class AlbumPagerAdapter extends PagerAdapter {
                         int count = object.getInt("count");
                         viewCount.setText(String.format(Locale.getDefault(), "%d", count));
                         helper.updateViewCount(albumPin, count);
-                        if (object.getInt("version") != cursor.getInt(cursor.getColumnIndex(DatabaseHelper.ALBUM_VERSION))) {
+                        Cursor cursor1 = helper.getAlbumDetailsById(albumPin);
+                        cursor1.moveToFirst();
+                        int currentVersion = cursor1.getInt(cursor1.getColumnIndex(DatabaseHelper.ALBUM_VERSION));
+                        System.out.println(object.getInt("version") + "   Version  " + cursor.getInt(cursor.getColumnIndex(DatabaseHelper.ALBUM_VERSION))+  "   "+ currentVersion);
+                        if (object.getInt("version") != currentVersion) {
                             missing_error.setVisibility(View.VISIBLE);
                             missing_error.setText("Album update available..");
                             downloadAgain.setVisibility(View.VISIBLE);

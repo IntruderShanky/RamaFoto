@@ -22,6 +22,7 @@ import java.io.ByteArrayOutputStream;
 public class DownloadService extends IntentService {
 
     DatabaseHelper helper;
+    String pin;
 
     public DownloadService() {
         super("download_service");
@@ -31,7 +32,7 @@ public class DownloadService extends IntentService {
     protected void onHandleIntent(@Nullable Intent intent) {
         assert intent != null;
         System.out.println(intent.getStringExtra("json"));
-        String pin = intent.getStringExtra("pin");
+        pin = intent.getStringExtra("pin");
         helper.open();
         try {
             JSONObject object = new JSONObject(intent.getStringExtra("json"));
@@ -114,8 +115,7 @@ public class DownloadService extends IntentService {
                             .listener(new RequestListener<String, Bitmap>() {
                                 @Override
                                 public boolean onException(Exception e, String model, Target<Bitmap> target, boolean isFirstResource) {
-                                    if (i[0] != 0) i[0] -= 1;
-                                    else i[0] = 0;
+                                    sendProgress(-1, false);
                                     return true;
                                 }
 
@@ -139,8 +139,10 @@ public class DownloadService extends IntentService {
             }
         } catch (Exception e) {
             e.printStackTrace();
+            sendProgress(-1, false);
         }
     }
+
 
     @Override
     public void onCreate() {
@@ -159,6 +161,9 @@ public class DownloadService extends IntentService {
         Intent intent = new Intent(StaticData.BROADCAST_ACTION);
         intent.putExtra("progress", progress);
         intent.putExtra("completed", completed);
+        intent.putExtra("pin", pin);
         LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
+        if (progress == -1)
+            stopSelf();
     }
 }

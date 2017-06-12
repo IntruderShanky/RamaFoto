@@ -3,13 +3,13 @@ package com.islabs.photobook.Activity;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
@@ -18,6 +18,7 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
@@ -35,6 +36,7 @@ import com.islabs.photobook.Fragments.RearrangeAlbums;
 import com.islabs.photobook.Helper.DatabaseHelper;
 import com.islabs.photobook.R;
 import com.islabs.photobook.Services.DownloadService;
+import com.islabs.photobook.Utils.NetworkConnection;
 import com.islabs.photobook.Utils.StaticData;
 
 import org.json.JSONObject;
@@ -210,55 +212,50 @@ public class HomeActivity extends AppCompatActivity
 
     @Override
     public void getAlbum(final String pin) {
-        new Handler().post(new Runnable() {
+        Cursor cursor = helper.getAlbumDetailsById(pin);
+        if (cursor.moveToFirst()) {
+            showMessage("Album Already Exists!");
+            return;
+        }
+        Uri uri = Uri.parse(StaticData.GET_ALBUM);
+        uri = uri.buildUpon().appendQueryParameter(StaticData.ALBUM_PIN, pin)
+                .appendQueryParameter("user_id", preferences.getString("uid", "")).build();
+        milanoBuilder.setNetworkErrorMessage("You must be connected to internet")
+                .setDialogMessage("Fetching album info..").shouldDisplayDialog(true);
+        milanoBuilder.build().fromURL(uri.toString()).doGet().execute(new OnRequestComplete() {
             @Override
-            public void run() {
-                Cursor cursor = helper.getAlbumDetailsById(pin);
-                if (cursor.moveToFirst()) {
-                    showMessage("Album Already Exists!");
-                    return;
-                }
-                Uri uri = Uri.parse(StaticData.GET_ALBUM);
-                uri = uri.buildUpon().appendQueryParameter(StaticData.ALBUM_PIN, pin)
-                        .appendQueryParameter("user_id", preferences.getString("uid", "")).build();
-                milanoBuilder.setNetworkErrorMessage("You must be connected to internet")
-                        .setDialogMessage("Fetching album info..").shouldDisplayDialog(true);
-                milanoBuilder.build().fromURL(uri.toString()).doGet().execute(new OnRequestComplete() {
-                    @Override
-                    public void onSuccess(String response, int responseCode) {
-                        try {
-                            JSONObject object = new JSONObject(response);
-                            if (object.getString("status").toLowerCase().equals("success")) {
-                                if (object.getJSONArray("album_photos").length() < 1) {
-                                    showMessage("No photos found in this album.");
-                                    return;
-                                }
-                                progressDialog.setTitle("Downloading Album");
-                                progressDialog.setMax(100);
-                                progressDialog.setCancelable(false);
-                                progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-                                progressDialog.show();
-                                Intent downloadIntent = new Intent(HomeActivity.this, DownloadService.class);
-                                downloadIntent.putExtra("json", response);
-                                downloadIntent.putExtra("pin", pin);
-                                HomeActivity.this.startService(downloadIntent);
-                                IntentFilter statusIntentFilter = new IntentFilter(
-                                        StaticData.BROADCAST_ACTION);
-                                DownloadReceiver statusReceiver = new DownloadReceiver();
-                                LocalBroadcastManager.getInstance(HomeActivity.this).registerReceiver(statusReceiver, statusIntentFilter);
-                            } else {
-                                showMessage(object.getString("message"));
-                            }
-                        } catch (Exception e) {
-                            e.printStackTrace();
+            public void onSuccess(String response, int responseCode) {
+                try {
+                    JSONObject object = new JSONObject(response);
+                    if (object.getString("status").toLowerCase().equals("success")) {
+                        if (object.getJSONArray("album_photos").length() < 1) {
+                            showMessage("No photos found in this album.");
+                            return;
                         }
+                        progressDialog.setTitle("Downloading Album");
+                        progressDialog.setMax(100);
+                        progressDialog.setCancelable(false);
+                        progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+                        progressDialog.show();
+                        Intent downloadIntent = new Intent(HomeActivity.this, DownloadService.class);
+                        downloadIntent.putExtra("json", response);
+                        downloadIntent.putExtra("pin", pin);
+                        HomeActivity.this.startService(downloadIntent);
+                        IntentFilter statusIntentFilter = new IntentFilter(
+                                StaticData.BROADCAST_ACTION);
+                        DownloadReceiver statusReceiver = new DownloadReceiver();
+                        LocalBroadcastManager.getInstance(HomeActivity.this).registerReceiver(statusReceiver, statusIntentFilter);
+                    } else {
+                        showMessage(object.getString("message"));
                     }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
 
-                    @Override
-                    public void onError(String error, int errorCode) {
+            @Override
+            public void onError(String error, int errorCode) {
 
-                    }
-                });
             }
         });
     }
@@ -351,6 +348,38 @@ public class HomeActivity extends AppCompatActivity
         public void onReceive(Context context, Intent intent) {
             if (intent.getAction().equals(StaticData.BROADCAST_ACTION)) {
                 int progress = intent.getIntExtra("progress", 0);
+                if (progress == -1) {
+                    final String pin = intent.getStringExtra("pin");
+                    progressDialog.dismiss();
+                    AlertDialog.Builder builder = new AlertDialog.Builder(HomeActivity.this);
+                    builder.setTitle("Downloading Failed");
+                    builder.setMessage("Error in downloading the album..");
+                    builder.setPositiveButton("Retry", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            if (NetworkConnection.isConnected(HomeActivity.this)) {
+                                helper.deleteAlbum(pin);
+                                getAlbum(pin);
+                            }
+                        }
+                    });
+                    builder.setNegativeButton("Close", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            try {
+                                inStack(HOME_STACK);
+                                getSupportFragmentManager()
+                                        .beginTransaction()
+                                        .replace(R.id.container, allAlbumDetails, HOME_STACK)
+                                        .commit();
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    });
+                    builder.show();
+                    return;
+                }
                 System.out.println("Progress in receiver " + progress);
                 progressDialog.setProgress(progress);
                 if (intent.getBooleanExtra("completed", false)) {
