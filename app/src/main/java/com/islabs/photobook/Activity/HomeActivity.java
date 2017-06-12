@@ -360,6 +360,8 @@ public class HomeActivity extends AppCompatActivity
                             if (NetworkConnection.isConnected(HomeActivity.this)) {
                                 helper.deleteAlbum(pin);
                                 getAlbum(pin);
+                            }else{
+                                showMessage("Internet connection unavailable..");
                             }
                         }
                     });
