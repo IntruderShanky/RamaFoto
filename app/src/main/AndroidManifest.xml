@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.islabs.photobook">
+    package="com.islabs.ramafoto">
 
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
@@ -19,20 +19,20 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".Activity.MainActivity"
+            android:name="com.islabs.ramafoto.Activity.MainActivity"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".Activity.HomeActivity"
+            android:name="com.islabs.ramafoto.Activity.HomeActivity"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme">
 
         </activity>
         <activity
-            android:name=".Activity.AlbumViewActivity"
+            android:name="com.islabs.ramafoto.Activity.AlbumViewActivity"
             android:screenOrientation="sensorLandscape"
             android:theme="@style/AlbumViewTheme" />
         <activity
-            android:name=".Activity.SplashScreen"
+            android:name="com.islabs.ramafoto.Activity.SplashScreen"
             android:theme="@style/AlbumViewTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -41,7 +41,7 @@
         </activity>
 
         <service
-            android:name=".Services.DownloadService"
+            android:name="com.islabs.ramafoto.Services.DownloadService"
             android:exported="false" />
     </application>
 

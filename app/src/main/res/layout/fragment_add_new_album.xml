@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/app_bg"
-    tools:context="com.islabs.photobook.Fragments.AddNewAlbum">
+    tools:context="com.islabs.ramafoto.Fragments.AddNewAlbum">
 
 
     <android.support.v7.widget.CardView

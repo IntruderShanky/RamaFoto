@@ -5,7 +5,7 @@
     android:layout_height="match_parent"
     android:background="@drawable/app_bg"
     android:orientation="vertical"
-    tools:context="com.islabs.photobook.Fragments.AboutUs">
+    tools:context="com.islabs.ramafoto.Fragments.AboutUs">
 
     <android.support.v7.widget.CardView
         android:layout_width="match_parent"
@@ -36,7 +36,7 @@
                 android:layout_height="40dp"
                 android:fontFamily="sans-serif-smallcaps"
                 android:gravity="center"
-                android:text="Wedd Junction"
+                android:text="Rama Foto"
                 android:textColor="@color/color5"
                 android:textSize="20sp"
                 android:textStyle="bold" />

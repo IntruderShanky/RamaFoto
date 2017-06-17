@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:background="@drawable/app_bg"
     android:layout_height="match_parent"
-    tools:context="com.islabs.photobook.Fragments.RearrangeAlbums">
+    tools:context="com.islabs.ramafoto.Fragments.RearrangeAlbums">
     
     <TextView
         android:layout_width="match_parent"
