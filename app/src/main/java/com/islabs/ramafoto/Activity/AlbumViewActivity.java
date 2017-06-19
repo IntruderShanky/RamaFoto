@@ -16,8 +16,9 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.MotionEvent;
-import android.view.ScaleGestureDetector;
 import android.view.View;
 
 import com.islabs.ramafoto.Adapters.GalleryAdapter;
@@ -27,7 +28,7 @@ import com.islabs.ramafoto.Helper.DatabaseHelper;
 import com.islabs.ramafoto.R;
 import com.islabs.ramafoto.Utils.StaticData;
 
-public class AlbumViewActivity extends AppCompatActivity implements ScaleGestureDetector.OnScaleGestureListener {
+public class AlbumViewActivity extends AppCompatActivity {
 
     private AlbumView albumView;
     private DatabaseHelper helper;
@@ -41,6 +42,7 @@ public class AlbumViewActivity extends AppCompatActivity implements ScaleGesture
         }
     };
     private Handler handler = new Handler();
+    private float margin = .15f;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -90,6 +92,7 @@ public class AlbumViewActivity extends AppCompatActivity implements ScaleGesture
         }));
         albumView = (AlbumView) findViewById(R.id.album_view);
         albumDetails.moveToFirst();
+        calculateScaleRatio(albumDetails.getBlob(albumDetails.getColumnIndex(DatabaseHelper.COVER)));
         albumView.setPageProvider(new PageProvider(cursor,
                 albumDetails.getBlob(albumDetails.getColumnIndex(DatabaseHelper.COVER)),
                 albumDetails.getBlob(albumDetails.getColumnIndex(DatabaseHelper.BACK))));
@@ -167,19 +170,29 @@ public class AlbumViewActivity extends AppCompatActivity implements ScaleGesture
         });
     }
 
-    @Override
-    public boolean onScale(ScaleGestureDetector detector) {
-        return false;
-    }
+    private void calculateScaleRatio(byte[] image) {
 
-    @Override
-    public boolean onScaleBegin(ScaleGestureDetector detector) {
-        return false;
-    }
+        Bitmap bitmap = getBitmapFromBytes(image, false);
+        int bitmapHeight = bitmap.getHeight();
+        int bitmapWidth = bitmap.getWidth();
 
-    @Override
-    public void onScaleEnd(ScaleGestureDetector detector) {
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+        float aspectRatio = ((float) displayMetrics.widthPixels) / ((float) displayMetrics.heightPixels);
+        int decreasedHeight = (int) (((float) displayMetrics.widthPixels) / aspectRatio);
+        float r = ((float) bitmapHeight) / ((float) bitmapWidth);
+        System.out.println("R " + r);
+        int rHeight = (int) (displayMetrics.widthPixels * r) / 2;
+        Log.d("LP WIDTH", displayMetrics.widthPixels + "");
+        Log.d("LP HEIGHT", rHeight + "");
+        Log.d("V WIDTH", bitmapWidth + "");
+        Log.d("V HEIGHT", bitmapHeight + "");
+        Log.d("ASPECT RATIO", aspectRatio + "");
+        Log.d("DECREASED HEIGHT", decreasedHeight + "");
 
+        float scaleFactor = (displayMetrics.heightPixels - rHeight) / 2;
+        margin = ((100 * scaleFactor) / displayMetrics.heightPixels) * .01f;
+        System.out.println("Margin " + margin);
     }
 
     /**
@@ -263,8 +276,9 @@ public class AlbumViewActivity extends AppCompatActivity implements ScaleGesture
     private class SizeChangedObserver implements AlbumView.SizeChangedObserver {
         @Override
         public void onSizeChanged(int w, int h) {
+            System.out.println(margin);
             albumView.setViewMode(AlbumView.SHOW_TWO_PAGES);
-            albumView.setMargins(0, .15f, 0, .15f);
+            albumView.setMargins(0, margin, 0, margin);
         }
     }
 

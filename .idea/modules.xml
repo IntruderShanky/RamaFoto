@@ -2,8 +2,8 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/RamaFoto.iml" filepath="$PROJECT_DIR$/RamaFoto.iml" />
       <module fileurl="file://$PROJECT_DIR$/WEDJUNCTIONPhotobook.iml" filepath="$PROJECT_DIR$/WEDJUNCTIONPhotobook.iml" />
-      <module fileurl="file://$PROJECT_DIR$/Wedd-Junction-Glass.iml" filepath="$PROJECT_DIR$/Wedd-Junction-Glass.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
     </modules>
   </component>
