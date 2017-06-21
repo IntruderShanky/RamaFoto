@@ -96,7 +96,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                                     startActivity(new Intent(MainActivity.this, HomeActivity.class));
                                     MainActivity.this.finish();
                                 }
-                                Toast.makeText(MainActivity.this, object.getString("message"), Toast.LENGTH_SHORT).show();
+                              //  Toast.makeText(MainActivity.this, object.getString("message"), Toast.LENGTH_SHORT).show();
                             } catch (Exception e) {
                                 e.printStackTrace();
                             }

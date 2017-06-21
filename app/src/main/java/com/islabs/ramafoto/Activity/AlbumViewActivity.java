@@ -92,7 +92,8 @@ public class AlbumViewActivity extends AppCompatActivity {
         }));
         albumView = (AlbumView) findViewById(R.id.album_view);
         albumDetails.moveToFirst();
-        calculateScaleRatio(albumDetails.getBlob(albumDetails.getColumnIndex(DatabaseHelper.COVER)));
+        cursor.moveToFirst();
+        calculateScaleRatio(cursor.getBlob(cursor.getColumnIndex(DatabaseHelper.IMAGE_DATA)));
         albumView.setPageProvider(new PageProvider(cursor,
                 albumDetails.getBlob(albumDetails.getColumnIndex(DatabaseHelper.COVER)),
                 albumDetails.getBlob(albumDetails.getColumnIndex(DatabaseHelper.BACK))));
@@ -192,6 +193,8 @@ public class AlbumViewActivity extends AppCompatActivity {
 
         float scaleFactor = (displayMetrics.heightPixels - rHeight) / 2;
         margin = ((100 * scaleFactor) / displayMetrics.heightPixels) * .01f;
+        if (margin < 0)
+            margin = 0.0f;
         System.out.println("Margin " + margin);
     }
 
