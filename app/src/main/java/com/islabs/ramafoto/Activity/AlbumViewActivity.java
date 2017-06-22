@@ -8,6 +8,7 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
+import android.media.MediaPlayer;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -20,6 +21,7 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.ImageView;
 
 import com.islabs.ramafoto.Adapters.GalleryAdapter;
 import com.islabs.ramafoto.Animations.AlbumPage;
@@ -43,6 +45,8 @@ public class AlbumViewActivity extends AppCompatActivity {
     };
     private Handler handler = new Handler();
     private float margin = .15f;
+    private MediaPlayer mediaPlayer;
+    private ImageView pauseVolume;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -169,6 +173,24 @@ public class AlbumViewActivity extends AppCompatActivity {
                 handler.postDelayed(runnable, 2000);
             }
         });
+
+        mediaPlayer = MediaPlayer.create(getBaseContext(), R.raw.music);
+        mediaPlayer.setLooping(true);
+        mediaPlayer.start();
+
+        pauseVolume = (ImageView) findViewById(R.id.pause_volume);
+        pauseVolume.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (mediaPlayer.isPlaying()) {
+                    mediaPlayer.pause();
+                    pauseVolume.setImageResource(R.drawable.ic_volume_off);
+                }else {
+                    mediaPlayer.start();
+                    pauseVolume.setImageResource(R.drawable.ic_volume);
+                }
+            }
+        });
     }
 
     private void calculateScaleRatio(byte[] image) {
@@ -290,6 +312,12 @@ public class AlbumViewActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         helper.close();
+        try {
+            mediaPlayer.stop();
+            mediaPlayer.release();
+        } catch (Exception e) {
+
+        }
     }
 
     public interface GalleryListener {
