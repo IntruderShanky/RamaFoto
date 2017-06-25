@@ -120,14 +120,14 @@ public class AllAlbumDetails extends Fragment implements PagerCallback {
             }
             return;
         }
-        Uri uri = Uri.parse("http://weddjunction.com/site/album");
+        Uri uri = Uri.parse("https://play.google.com/store/apps/details?id=com.islabs.ramafoto");
         Uri imageUri = Uri.parse(MediaStore.Images.Media
                 .insertImage(getContext().getContentResolver(), bitmap, albumPin, "Cover Image"));
-        uri = uri.buildUpon().appendQueryParameter(StaticData.ALBUM_PIN, albumPin).build();
         Intent sharingIntent = new Intent(Intent.ACTION_SEND);
         sharingIntent.putExtra(Intent.EXTRA_STREAM, imageUri);
         sharingIntent.setType("image/png");
-        sharingIntent.putExtra(Intent.EXTRA_TEXT, "View my album here " + uri.toString());
+        sharingIntent.putExtra(Intent.EXTRA_TEXT, "Download Rama Foto App to view my album "
+                + uri.toString() + "\nAlbum Pin: " + albumPin);
         getContext().startActivity(Intent.createChooser(sharingIntent, "Share Album"));
     }
 
