@@ -18,7 +18,6 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
@@ -36,7 +35,6 @@ import com.islabs.ramafoto.Fragments.RearrangeAlbums;
 import com.islabs.ramafoto.Helper.DatabaseHelper;
 import com.islabs.ramafoto.R;
 import com.islabs.ramafoto.Services.DownloadService;
-import com.islabs.ramafoto.Utils.NetworkConnection;
 import com.islabs.ramafoto.Utils.StaticData;
 
 import org.json.JSONObject;
@@ -67,6 +65,7 @@ public class HomeActivity extends AppCompatActivity
     private static final String ADD_NEW_STACK = "add_new_stack";
     private static final String CONTACT_US_STACK = "contact_us";
     private SharedPreferences preferences;
+    private DownloadService downloadService;
 
 
     @Override
@@ -211,9 +210,9 @@ public class HomeActivity extends AppCompatActivity
     }
 
     @Override
-    public void getAlbum(final String pin) {
+    public void getAlbum(final String pin, final boolean completed) {
         Cursor cursor = helper.getAlbumDetailsById(pin);
-        if (cursor.moveToFirst()) {
+        if (cursor.moveToFirst() && completed) {
             showMessage("Album Already Exists!");
             return;
         }
@@ -226,6 +225,7 @@ public class HomeActivity extends AppCompatActivity
             @Override
             public void onSuccess(String response, int responseCode) {
                 try {
+                    downloadService = new DownloadService();
                     JSONObject object = new JSONObject(response);
                     if (object.getString("status").toLowerCase().equals("success")) {
                         if (object.getJSONArray("album_photos").length() < 1) {
@@ -239,15 +239,16 @@ public class HomeActivity extends AppCompatActivity
                         progressDialog.setButton(DialogInterface.BUTTON_NEGATIVE, "Cancel", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                getSharedPreferences("BACKGROUND", MODE_PRIVATE).edit().putBoolean("stop_service", true).apply();
+                                downloadService.stopDownload();
                             }
                         });
                         progressDialog.show();
                         Intent downloadIntent = new Intent(HomeActivity.this, DownloadService.class);
                         downloadIntent.putExtra("json", response);
                         downloadIntent.putExtra("pin", pin);
-                        getSharedPreferences("BACKGROUND", MODE_PRIVATE).edit().putBoolean("stop_service", false).apply();
-                        HomeActivity.this.startService(downloadIntent);
+                        downloadIntent.putExtra("complete_download", completed);
+                        downloadService.startDownload(downloadIntent, HomeActivity.this);
+
                         IntentFilter statusIntentFilter = new IntentFilter(
                                 StaticData.BROADCAST_ACTION);
                         DownloadReceiver statusReceiver = new DownloadReceiver();
@@ -355,45 +356,14 @@ public class HomeActivity extends AppCompatActivity
         public void onReceive(Context context, Intent intent) {
             if (intent.getAction().equals(StaticData.BROADCAST_ACTION)) {
                 int progress = intent.getIntExtra("progress", 0);
-                if (progress == -1) {
-                    final String pin = intent.getStringExtra("pin");
-                    progressDialog.dismiss();
-                    AlertDialog.Builder builder = new AlertDialog.Builder(HomeActivity.this);
-                    builder.setTitle("Downloading Failed");
-                    builder.setMessage("Error in downloading the album..");
-                    builder.setPositiveButton("Retry", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            if (NetworkConnection.isConnected(HomeActivity.this)) {
-                                helper.deleteAlbum(pin);
-                                getAlbum(pin);
-                            } else {
-                                showMessage("Internet connection unavailable..");
-                            }
-                        }
-                    });
-                    builder.setNegativeButton("Close", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            try {
-                                inStack(HOME_STACK);
-                                getSupportFragmentManager()
-                                        .beginTransaction()
-                                        .replace(R.id.container, allAlbumDetails, HOME_STACK)
-                                        .commit();
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                            }
-                        }
-                    });
-                    builder.show();
-                    return;
-                }
-                System.out.println("Progress in receiver " + progress);
+                boolean completed = intent.getBooleanExtra("completed", false);
                 progressDialog.setProgress(progress);
-                if (intent.getBooleanExtra("completed", false)) {
-                    if (!getSharedPreferences("BACKGROUND", MODE_PRIVATE).getBoolean("stop_service", false))
+                if (completed) {
+                    if (progress < 100) {
+                        showMessage("Error in downloading some images..");
+                    } else if (progress == 100) {
                         showMessage("Album Downloaded");
+                    }
                     progressDialog.dismiss();
                     try {
                         inStack(HOME_STACK);
@@ -405,6 +375,7 @@ public class HomeActivity extends AppCompatActivity
                         e.printStackTrace();
                     }
                 }
+                System.out.println("Progress in receiver " + progress);
             }
         }
     }

@@ -2,7 +2,7 @@ package com.islabs.ramafoto.Adapters;
 
 import android.content.Context;
 import android.database.Cursor;
-import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.support.v4.view.MotionEventCompat;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -16,6 +16,8 @@ import com.islabs.ramafoto.Helper.ItemTouchHelperAdapter;
 import com.islabs.ramafoto.Helper.ItemTouchHelperViewHolder;
 import com.islabs.ramafoto.Helper.OnStartDragListener;
 import com.islabs.ramafoto.R;
+
+import java.io.File;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -47,8 +49,10 @@ public class AlbumAdapter extends RecyclerView.Adapter<AlbumAdapter.ViewHolder> 
     @Override
     public void onBindViewHolder(final ViewHolder holder, int position) {
         cursor.moveToPosition(position);
-        byte[] image = cursor.getBlob(cursor.getColumnIndex(DatabaseHelper.COVER));
-        holder.albumCover.setImageBitmap(BitmapFactory.decodeByteArray(image, 0, image.length));
+        String pin = cursor.getString(cursor.getColumnIndex(DatabaseHelper.ALBUM_ID));
+        Uri uri = Uri.parse(context.getFilesDir().getPath().concat(File.separator).concat(pin)
+                .concat(File.separator).concat("cover.jpg"));
+        holder.albumCover.setImageURI(uri);
         holder.itemView.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {

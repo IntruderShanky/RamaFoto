@@ -1,6 +1,7 @@
 package com.islabs.ramafoto.Callbacks;
 
 import android.graphics.Bitmap;
+import android.net.Uri;
 
 /**
  * Created by shanky on 1/6/17.
@@ -9,7 +10,7 @@ import android.graphics.Bitmap;
 public interface PagerCallback {
     void onAlbumDelete(String albumPin);
 
-    void onShare(String albumPin, Bitmap bitmap);
+    void onShare(String albumPin, Uri imageUri);
 
     void callPhotoStudio(String contactNumber);
 

@@ -31,6 +31,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
 import java.util.Locale;
 
 /**
@@ -79,10 +80,7 @@ public class AlbumPagerAdapter extends PagerAdapter {
         viewCount.setText(cursor.getString(cursor.getColumnIndex(DatabaseHelper.VIEW_COUNT)));
         photographerAddress.setText(cursor.getString(cursor.getColumnIndex(DatabaseHelper.PHOTOGRAPHER_ADDRESS)));
         photographerContact.setText(cursor.getString(cursor.getColumnIndex(DatabaseHelper.PHOTOGRAPHER_CONTACT)));
-        final byte[] image = cursor.getBlob(cursor.getColumnIndex(DatabaseHelper.COVER));
-        final Bitmap bitmap = BitmapFactory.decodeByteArray(image, 0, image.length);
         Glide.with(context).load(cursor.getString(cursor.getColumnIndex(DatabaseHelper.LAB_LOGO))).into(photographerLogo);
-        coverPhoto.setImageBitmap(bitmap);
         if (labName.getText().toString().isEmpty())
             view.findViewById(R.id.processed_by).setVisibility(View.GONE);
         else view.findViewById(R.id.processed_by).setVisibility(View.VISIBLE);
@@ -90,10 +88,13 @@ public class AlbumPagerAdapter extends PagerAdapter {
             view.findViewById(R.id.photographed_by).setVisibility(View.GONE);
         else view.findViewById(R.id.photographed_by).setVisibility(View.VISIBLE);
         final String albumPin = cursor.getString(cursor.getColumnIndex(DatabaseHelper.ALBUM_ID));
+        final Uri image = Uri.parse(context.getFilesDir().getPath().concat(File.separator).concat(albumPin)
+                .concat(File.separator).concat("cover.jpg"));
+        coverPhoto.setImageURI(image);
         share.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                pagerCallback.onShare(albumPin, bitmap);
+                pagerCallback.onShare(albumPin, image);
             }
         });
         delete.setOnClickListener(new View.OnClickListener() {

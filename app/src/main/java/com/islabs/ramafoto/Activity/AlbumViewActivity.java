@@ -30,6 +30,8 @@ import com.islabs.ramafoto.Helper.DatabaseHelper;
 import com.islabs.ramafoto.R;
 import com.islabs.ramafoto.Utils.StaticData;
 
+import java.io.File;
+
 public class AlbumViewActivity extends AppCompatActivity {
 
     private AlbumView albumView;
@@ -46,6 +48,7 @@ public class AlbumViewActivity extends AppCompatActivity {
     private Handler handler = new Handler();
     private float margin = .15f;
     private MediaPlayer mediaPlayer;
+    private boolean isPlaying = true;
     private ImageView pauseVolume;
 
     @Override
@@ -97,10 +100,12 @@ public class AlbumViewActivity extends AppCompatActivity {
         albumView = (AlbumView) findViewById(R.id.album_view);
         albumDetails.moveToFirst();
         cursor.moveToFirst();
-        calculateScaleRatio(cursor.getBlob(cursor.getColumnIndex(DatabaseHelper.IMAGE_DATA)));
-        albumView.setPageProvider(new PageProvider(cursor,
-                albumDetails.getBlob(albumDetails.getColumnIndex(DatabaseHelper.COVER)),
-                albumDetails.getBlob(albumDetails.getColumnIndex(DatabaseHelper.BACK))));
+        String coverFile = getFilesDir().getPath().concat(File.separator).concat(albumId)
+                .concat(File.separator).concat("cover.jpg");
+        String backFile = getFilesDir().getPath().concat(File.separator).concat(albumId)
+                .concat(File.separator).concat("back.jpg");
+        calculateScaleRatio(cursor.getString(cursor.getColumnIndex(DatabaseHelper.IMAGE_DATA)));
+        albumView.setPageProvider(new PageProvider(cursor, coverFile, backFile));
         albumView.setSizeChangedObserver(new SizeChangedObserver());
         albumView.setCurrentIndex(index);
         albumView.setBackgroundColor(ContextCompat.getColor(this, android.R.color.transparent));
@@ -185,7 +190,7 @@ public class AlbumViewActivity extends AppCompatActivity {
                 if (mediaPlayer.isPlaying()) {
                     mediaPlayer.pause();
                     pauseVolume.setImageResource(R.drawable.ic_volume_off);
-                }else {
+                } else {
                     mediaPlayer.start();
                     pauseVolume.setImageResource(R.drawable.ic_volume);
                 }
@@ -193,9 +198,10 @@ public class AlbumViewActivity extends AppCompatActivity {
         });
     }
 
-    private void calculateScaleRatio(byte[] image) {
-
-        Bitmap bitmap = getBitmapFromBytes(image, false);
+    private void calculateScaleRatio(String  image) {
+        BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inPreferredConfig = Bitmap.Config.ARGB_8888;
+        Bitmap bitmap = BitmapFactory.decodeFile(image, options);
         int bitmapHeight = bitmap.getHeight();
         int bitmapWidth = bitmap.getWidth();
 
@@ -226,10 +232,10 @@ public class AlbumViewActivity extends AppCompatActivity {
     private class PageProvider implements AlbumView.PageProvider {
 
         Cursor cursor;
-        byte[] cover, back;
+        String cover, back;
         int pageCount;
 
-        public PageProvider(Cursor cursor, byte[] cover, byte[] back) {
+        public PageProvider(Cursor cursor, String cover, String back) {
             this.cursor = cursor;
             this.cover = cover;
             this.back = back;
@@ -256,22 +262,22 @@ public class AlbumViewActivity extends AppCompatActivity {
             }
             if (index == 0) {
                 //linearLayoutManager.scrollToPosition(0);
-                front = getBitmapFromBytes(this.cover, false);
-                back = getBitmapFromBytes(cursor.getBlob(
+                front = getBitmapFromFile(this.cover, false);
+                back = getBitmapFromFile(cursor.getString(
                         cursor.getColumnIndex(DatabaseHelper.IMAGE_DATA)), true);
             } else if (atLast) {
                 // linearLayoutManager.scrollToPosition(cursor.getCount() - 1);
                 cursor.moveToLast();
-                front = getBitmapFromBytes(cursor.getBlob(
+                front = getBitmapFromFile(cursor.getString(
                         cursor.getColumnIndex(DatabaseHelper.IMAGE_DATA)), false);
-                back = getBitmapFromBytes(this.back, true);
+                back = getBitmapFromFile(this.back, true);
 
             } else {
                 //  linearLayoutManager.scrollToPosition(index * 2);
-                back = getBitmapFromBytes(cursor.getBlob(
+                back = getBitmapFromFile(cursor.getString(
                         cursor.getColumnIndex(DatabaseHelper.IMAGE_DATA)), true);
                 cursor.moveToPrevious();
-                front = getBitmapFromBytes(cursor.getBlob(
+                front = getBitmapFromFile(cursor.getString(
                         cursor.getColumnIndex(DatabaseHelper.IMAGE_DATA)), false);
             }
 
@@ -284,8 +290,10 @@ public class AlbumViewActivity extends AppCompatActivity {
 
     }
 
-    public Bitmap getBitmapFromBytes(byte[] image, boolean reverse) {
-        Bitmap bitmap = BitmapFactory.decodeByteArray(image, 0, image.length);
+    public Bitmap getBitmapFromFile(String image, boolean reverse) {
+        BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inPreferredConfig = Bitmap.Config.ARGB_8888;
+        Bitmap bitmap = BitmapFactory.decodeFile(image, options);
         if (reverse) {
             Matrix matrix = new Matrix();
             matrix.setScale(-1, 1);

@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -26,7 +27,8 @@ import com.islabs.ramafoto.Helper.DatabaseHelper;
 import com.islabs.ramafoto.R;
 import com.islabs.ramafoto.Transformers.StackTransformer;
 import com.islabs.ramafoto.Utils.NetworkConnection;
-import com.islabs.ramafoto.Utils.StaticData;
+
+import java.io.File;
 
 public class AllAlbumDetails extends Fragment implements PagerCallback {
 
@@ -103,6 +105,9 @@ public class AllAlbumDetails extends Fragment implements PagerCallback {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 helper.deleteAlbum(albumPin);
+                File file = new File(getContext().getFilesDir().getPath()
+                        .concat(File.separator).concat(albumPin));
+                deleteRecursive(file);
                 refreshPager();
             }
         });
@@ -112,7 +117,7 @@ public class AllAlbumDetails extends Fragment implements PagerCallback {
     }
 
     @Override
-    public void onShare(String albumPin, Bitmap bitmap) {
+    public void onShare(String albumPin, Uri image) {
         if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED
                 && ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -120,6 +125,7 @@ public class AllAlbumDetails extends Fragment implements PagerCallback {
             }
             return;
         }
+        Bitmap bitmap = BitmapFactory.decodeFile(image.getPath());
         Uri uri = Uri.parse("https://play.google.com/store/apps/details?id=com.islabs.ramafoto");
         Uri imageUri = Uri.parse(MediaStore.Images.Media
                 .insertImage(getContext().getContentResolver(), bitmap, albumPin, "Cover Image"));
@@ -138,6 +144,13 @@ public class AllAlbumDetails extends Fragment implements PagerCallback {
         getContext().startActivity(callIntent);
     }
 
+    void deleteRecursive(File fileOrDirectory) {
+        if (fileOrDirectory.isDirectory())
+            for (File child : fileOrDirectory.listFiles())
+                deleteRecursive(child);
+        fileOrDirectory.delete();
+    }
+
     @Override
     public void viewAlbum(String albumPin) {
         callback.viewAlbum(albumPin);
@@ -146,9 +159,7 @@ public class AllAlbumDetails extends Fragment implements PagerCallback {
     @Override
     public void getAlbum(String pin) {
         if (NetworkConnection.isConnected(getContext())) {
-            helper.deleteAlbum(pin);
-            refreshPager();
-            callback.getAlbum(pin);
+            callback.getAlbum(pin, false);
         } else
             callback.showMessage("Internet connection unavailable..");
     }
@@ -165,7 +176,7 @@ public class AllAlbumDetails extends Fragment implements PagerCallback {
 
         void addNewAlbum();
 
-        void getAlbum(String pin);
+        void getAlbum(String pin, boolean completeDownload);
 
         void showMessage(String s);
     }

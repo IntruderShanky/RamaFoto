@@ -13,6 +13,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 public class DatabaseHelper {
 
 
+    public static final String IMAGE_DATA = "image_path";
     private SQLiteInnerHelper helper;
     private SQLiteDatabase database;
 
@@ -21,7 +22,6 @@ public class DatabaseHelper {
 
     //Tables
     public static final String ALBUMS_TABLE = "albums";
-    public static final String RECENT_ALBUMS = "recent_albums";
     public static final String ALBUM_DETAILS = "album_details";
 
     //Columns
@@ -30,13 +30,10 @@ public class DatabaseHelper {
     public static final String EVENT_DETAILS = "event_details";
     public static final String ALBUM_VERSION = "album_version";
     public static final String DATE_OPEN = "date_open";
-    public static final String IMAGE_DATA = "image_data";
     public static final String IMAGE_NUM = "image_num";
     public static final String COLUMN_ID = "id";
-    public static final String COVER = "cover_photo";
     public static final String INDEX = "position";
     public static final String NUM_IMAGES = "num_images";
-    public static final String BACK = "back_photo";
     public static final String LAB_NAME = "lab_name";
     public static final String LAB_ADDRESS = "lab_address";
     public static final String LAB_CONTACT = "lab_contact";
@@ -66,15 +63,9 @@ public class DatabaseHelper {
     public void insertAlbum(String tableName, ContentValues contentValues) {
         try {
             database.insert(tableName, null, contentValues);
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
-    }
-
-    public void updateRecentAlbum(long date, String albumId) {
-        ContentValues contentValues = new ContentValues();
-        contentValues.put(DATE_OPEN, date);
-        database.update(RECENT_ALBUMS, contentValues, ALBUM_ID + "=" + albumId, null);
     }
 
     public Cursor getAlbumDetailsById(String pin) {
@@ -82,7 +73,7 @@ public class DatabaseHelper {
     }
 
     public Cursor getImagesOfAlbum(String albumId) {
-        return database.rawQuery("select * from " + ALBUMS_TABLE + " where " + ALBUM_ID + " = " + albumId + ";", null);
+        return database.rawQuery("select * from " + ALBUMS_TABLE + " where " + ALBUM_ID + " = " + albumId + " order by " + IMAGE_NUM + ";", null);
     }
 
     public Cursor getAllAlbums() {
@@ -116,7 +107,6 @@ public class DatabaseHelper {
 
     public void resetAlbums() {
         database.execSQL("delete from " + ALBUMS_TABLE + ";");
-        database.execSQL("delete from " + RECENT_ALBUMS + ";");
         database.execSQL("delete from " + ALBUM_DETAILS + ";");
     }
 
@@ -125,14 +115,8 @@ public class DatabaseHelper {
 
         private String CREATE_TABLE_ALBUMS = "create table " + ALBUMS_TABLE
                 + "(" + ALBUM_ID + " string not null, "
-                + IMAGE_DATA + " blob not null, "
                 + IMAGE_NUM + " number not null, "
-                + COLUMN_ID + " number autoincreament primary key," +
-                "FOREIGN KEY(" + ALBUM_ID + ") REFERENCES " + ALBUM_DETAILS + "(" + ALBUM_ID + "));";
-
-        private String CREATE_TABLE_RECENT_ALBUMS = "create table " + RECENT_ALBUMS
-                + "(" + ALBUM_ID + " string not null, "
-                + DATE_OPEN + " long not null, "
+                + IMAGE_DATA + " string not null, "
                 + COLUMN_ID + " number autoincreament primary key," +
                 "FOREIGN KEY(" + ALBUM_ID + ") REFERENCES " + ALBUM_DETAILS + "(" + ALBUM_ID + "));";
 
@@ -141,11 +125,9 @@ public class DatabaseHelper {
                 + ALBUM_NAME + " string not null, "
                 + EVENT_DETAILS + " string not null, "
                 + NUM_IMAGES + " number not null, "
-                + COVER + " blob not null, "
                 + VIEW_COUNT + " number not null, "
                 + INDEX + " number not null, "
                 + ALBUM_VERSION + " number not null, "
-                + BACK + " blob not null, "
                 + LAB_NAME + " string not null, "
                 + LAB_ADDRESS + " string not null, "
                 + LAB_CONTACT + " string not null, "
@@ -167,13 +149,11 @@ public class DatabaseHelper {
         public void onCreate(SQLiteDatabase db) {
             db.execSQL(CREATE_TABLE_ALBUM_DETAILS);
             db.execSQL(CREATE_TABLE_ALBUMS);
-            db.execSQL(CREATE_TABLE_RECENT_ALBUMS);
         }
 
         @Override
         public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
             db.execSQL("DROP TABLE IF EXISTS " + ALBUMS_TABLE + ";");
-            db.execSQL("DROP TABLE IF EXISTS " + RECENT_ALBUMS + ";");
             db.execSQL("DROP TABLE IF EXISTS " + ALBUM_DETAILS + ";");
             onCreate(db);
         }

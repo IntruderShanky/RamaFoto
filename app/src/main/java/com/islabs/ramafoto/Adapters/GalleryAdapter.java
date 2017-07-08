@@ -2,7 +2,7 @@ package com.islabs.ramafoto.Adapters;
 
 import android.content.Context;
 import android.database.Cursor;
-import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -29,7 +29,6 @@ public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.ViewHold
     }
 
 
-
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         return new ViewHolder(LayoutInflater.from(context).inflate(R.layout.gallery_item_view, parent, false));
@@ -38,8 +37,8 @@ public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.ViewHold
     @Override
     public void onBindViewHolder(ViewHolder holder, final int position) {
         cursor.moveToPosition(position);
-        byte[] image = cursor.getBlob(cursor.getColumnIndex(DatabaseHelper.IMAGE_DATA));
-        holder.albumCover.setImageBitmap(BitmapFactory.decodeByteArray(image, 0, image.length));
+        Uri uri = Uri.parse(cursor.getString(cursor.getColumnIndex(DatabaseHelper.IMAGE_DATA)));
+        holder.albumCover.setImageURI(uri);
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
