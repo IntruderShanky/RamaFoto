@@ -14,6 +14,7 @@ import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -155,7 +156,17 @@ public class HomeActivity extends AppCompatActivity
                             .commit();
                 break;
             case R.id.home:
-                getSupportFragmentManager().popBackStack();
+                if (helper.getAllAlbums().moveToFirst()) {
+                    try {
+                        getSupportFragmentManager().popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
+                        getSupportFragmentManager()
+                                .beginTransaction()
+                                .add(R.id.container, new AllAlbumDetails(), HOME_STACK)
+                                .commit();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
                 break;
             case R.id.add_new:
                 fab.performClick();
@@ -368,10 +379,10 @@ public class HomeActivity extends AppCompatActivity
                     }
                     progressDialog.dismiss();
                     try {
-                        inStack(HOME_STACK);
+                        getSupportFragmentManager().popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
                         getSupportFragmentManager()
                                 .beginTransaction()
-                                .replace(R.id.container, allAlbumDetails, HOME_STACK)
+                                .add(R.id.container, new AllAlbumDetails(), HOME_STACK)
                                 .commit();
                     } catch (Exception e) {
                         e.printStackTrace();

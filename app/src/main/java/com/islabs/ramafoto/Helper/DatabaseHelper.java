@@ -46,7 +46,7 @@ public class DatabaseHelper {
     public static final String LAB_LINK = "lab_link";
     public static final String PHOTOGRAPHER_LINK = "photographer_link";
 
-    private int DB_CURRENT_VERSION = 1;
+    private int DB_CURRENT_VERSION = 3;
 
     public DatabaseHelper(Context context) {
         this.helper = new SQLiteInnerHelper(context, DB_NAME, null, DB_CURRENT_VERSION);
