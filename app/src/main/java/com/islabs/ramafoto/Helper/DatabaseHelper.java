@@ -94,6 +94,12 @@ public class DatabaseHelper {
         database.execSQL("update " + ALBUM_DETAILS + " set " + INDEX + " = " + INDEX + " - 1 where " + INDEX + ">" + index + ";");
     }
 
+    public boolean isImageExist(String albumPin, int num) {
+        Cursor cursor = database.rawQuery("select * from " + ALBUMS_TABLE + " where " + ALBUM_ID + "==" + albumPin + " and " + IMAGE_NUM
+                + "==" + num + ";", null);
+        return cursor.getCount() > 0;
+    }
+
     public void setIndex(String albumPin, int to, int from) {
         if (to < from)
             database.execSQL("update " + ALBUM_DETAILS +

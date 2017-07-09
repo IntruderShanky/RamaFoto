@@ -34,10 +34,12 @@ public class DownloadService {
     private DatabaseHelper helper;
     private int errorCount;
     private boolean completeDownload;
+    private boolean downloadCancled;
 
 
     public void startDownload(Intent intent, Context context) {
         helper = new DatabaseHelper(context);
+        downloadCancled = false;
         helper.open();
         this.context = context;
         assert intent != null;
@@ -70,7 +72,7 @@ public class DownloadService {
                 object = (JSONObject) main;
                 photos = object.getJSONArray("album_photos");
                 total = photos.length() + 2;
-                imageDatas = new ImageData[total];
+                imageDatas = new ImageData[photos.length()];
                 ImageData coverPhoto = new ImageData(object.getString("cover_photo"), app.getPath().concat(File.separator).concat("cover.jpg"), "cover", -1);
                 backPhoto = new ImageData(object.getString("back_photo"), app.getPath().concat(File.separator).concat("back.jpg"), "back", -1);
                 downloadImage(coverPhoto);
@@ -79,12 +81,19 @@ public class DownloadService {
                 total = photos.length();
                 imageDatas = new ImageData[total];
             }
+            sendProgress();
             threadGroup = new ThreadGroup("download_images");
             for (int i = 0; i < photos.length(); i++) {
                 JSONObject photo = photos.getJSONObject(i);
                 String fileName = "image" + photo.getInt("page_number") + ".jpg";
                 String path = app.getPath().concat(File.separator).concat(fileName);
                 imageDatas[i] = new ImageData(photo.getString("src"), path, "image", photo.getInt("page_number"));
+            }
+            if (main instanceof JSONArray) {
+                int tempDownloadLimit = (total > 5 ? 5 : total);
+                for (int i = 0; i < tempDownloadLimit; i++) {
+                    downloadImage(imageDatas[++imageDownloadPointer]);
+                }
             }
         } catch (Exception e) {
 
@@ -97,8 +106,7 @@ public class DownloadService {
             @Override
             public void run() {
                 if (!completeDownload) {
-                    File file = new File(imageData.getFilePath());
-                    if (file.exists()) {
+                    if (helper.isImageExist(pin, imageData.getNum())) {
                         downloaded++;
                         setNextImageUrl();
                         return;
@@ -129,6 +137,10 @@ public class DownloadService {
                     output.flush();
                     output.close();
                     input.close();
+
+                    if (downloadCancled)
+                        return;
+
                     switch (imageData.getType()) {
                         case "cover":
                             downloadImage(backPhoto);
@@ -241,6 +253,7 @@ public class DownloadService {
     }
 
     public void stopDownload() {
+        downloadCancled = true;
         threadGroup.interrupt();
     }
 

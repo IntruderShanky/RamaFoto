@@ -194,7 +194,7 @@ public class AlbumPagerAdapter extends PagerAdapter {
                                     builder.show();
                                 }
                             });
-                    } catch (JSONException e) {
+                    } catch (Exception e) {
                         e.printStackTrace();
                     }
                 }

@@ -235,6 +235,7 @@ public class HomeActivity extends AppCompatActivity
                         progressDialog.setTitle("Downloading Album");
                         progressDialog.setMax(100);
                         progressDialog.setCancelable(false);
+                        progressDialog.setProgress(0);
                         progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
                         progressDialog.setButton(DialogInterface.BUTTON_NEGATIVE, "Cancel", new DialogInterface.OnClickListener() {
                             @Override
@@ -359,6 +360,7 @@ public class HomeActivity extends AppCompatActivity
                 boolean completed = intent.getBooleanExtra("completed", false);
                 progressDialog.setProgress(progress);
                 if (completed) {
+                    System.out.println("Progress in receiver " + progress);
                     if (progress < 100) {
                         showMessage("Error in downloading some images..");
                     } else if (progress == 100) {
@@ -375,7 +377,6 @@ public class HomeActivity extends AppCompatActivity
                         e.printStackTrace();
                     }
                 }
-                System.out.println("Progress in receiver " + progress);
             }
         }
     }
