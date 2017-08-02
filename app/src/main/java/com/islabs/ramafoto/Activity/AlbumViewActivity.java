@@ -48,6 +48,7 @@ public class AlbumViewActivity extends AppCompatActivity {
     private Handler handler = new Handler();
     private float margin = .15f;
     private ImageView pauseVolume;
+    private MediaPlayer mediaPlayer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -177,27 +178,27 @@ public class AlbumViewActivity extends AppCompatActivity {
             }
         });
 
-//        mediaPlayer = MediaPlayer.create(getBaseContext(), R.raw.music);
-//        mediaPlayer.setLooping(true);
-//        mediaPlayer.start();
+        mediaPlayer = MediaPlayer.create(getBaseContext(), R.raw.music);
+        mediaPlayer.setLooping(true);
+        mediaPlayer.start();
 
         pauseVolume = (ImageView) findViewById(R.id.pause_volume);
-        pauseVolume.setVisibility(View.GONE);
-//        pauseVolume.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                if (mediaPlayer.isPlaying()) {
-//                    mediaPlayer.pause();
-//                    pauseVolume.setImageResource(R.drawable.ic_volume_off);
-//                } else {
-//                    mediaPlayer.start();
-//                    pauseVolume.setImageResource(R.drawable.ic_volume);
-//                }
-//            }
-//        });
+//        pauseVolume.setVisibility(View.GONE);
+        pauseVolume.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (mediaPlayer.isPlaying()) {
+                    mediaPlayer.pause();
+                    pauseVolume.setImageResource(R.drawable.ic_volume_off);
+                } else {
+                    mediaPlayer.start();
+                    pauseVolume.setImageResource(R.drawable.ic_volume);
+                }
+            }
+        });
     }
 
-    private void calculateScaleRatio(String  image) {
+    private void calculateScaleRatio(String image) {
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inPreferredConfig = Bitmap.Config.ARGB_8888;
         Bitmap bitmap = BitmapFactory.decodeFile(image, options);
@@ -319,12 +320,12 @@ public class AlbumViewActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         helper.close();
-//        try {
-//            mediaPlayer.stop();
-//            mediaPlayer.release();
-//        } catch (Exception e) {
-//
-//        }
+        try {
+            mediaPlayer.stop();
+            mediaPlayer.release();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public interface GalleryListener {
