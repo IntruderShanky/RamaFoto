@@ -227,6 +227,7 @@ public class HomeActivity extends AppCompatActivity
             showMessage("Album Already Exists!");
             return;
         }
+        helper.deleteAlbum(pin);
         Uri uri = Uri.parse(StaticData.GET_ALBUM);
         uri = uri.buildUpon().appendQueryParameter(StaticData.ALBUM_PIN, pin)
                 .appendQueryParameter("user_id", preferences.getString("uid", "")).build();

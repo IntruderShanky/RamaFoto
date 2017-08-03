@@ -85,13 +85,17 @@ public class DatabaseHelper {
     }
 
     public void deleteAlbum(String albumPin) {
-        Cursor cursor = database.rawQuery("select * from " + ALBUM_DETAILS + " where " + ALBUM_ID + " = " + albumPin + ";", null);
-        cursor.moveToFirst();
-        int index = cursor.getInt(cursor.getColumnIndex(INDEX));
-        cursor.close();
-        database.execSQL("delete from " + ALBUMS_TABLE + " where " + ALBUM_ID + "=" + albumPin + ";");
-        database.execSQL("delete from " + ALBUM_DETAILS + " where " + ALBUM_ID + "=" + albumPin + ";");
-        database.execSQL("update " + ALBUM_DETAILS + " set " + INDEX + " = " + INDEX + " - 1 where " + INDEX + ">" + index + ";");
+        try {
+            Cursor cursor = database.rawQuery("select * from " + ALBUM_DETAILS + " where " + ALBUM_ID + " = " + albumPin + ";", null);
+            cursor.moveToFirst();
+            int index = cursor.getInt(cursor.getColumnIndex(INDEX));
+            cursor.close();
+            database.execSQL("delete from " + ALBUMS_TABLE + " where " + ALBUM_ID + "=" + albumPin + ";");
+            database.execSQL("delete from " + ALBUM_DETAILS + " where " + ALBUM_ID + "=" + albumPin + ";");
+            database.execSQL("update " + ALBUM_DETAILS + " set " + INDEX + " = " + INDEX + " - 1 where " + INDEX + ">" + index + ";");
+        }catch (Exception e){
+            e.printStackTrace();
+        }
     }
 
     public boolean isImageExist(String albumPin, int num) {
