@@ -33,7 +33,6 @@ public class DownloadService {
     private JSONObject object;
     private DatabaseHelper helper;
     private int errorCount;
-    private boolean completeDownload;
     private boolean downloadCancled;
 
 
@@ -45,14 +44,9 @@ public class DownloadService {
         assert intent != null;
         System.out.println(intent.getStringExtra("json"));
         pin = intent.getStringExtra("pin");
-        completeDownload = intent.getBooleanExtra("complete_download", true);
         try {
             JSONObject object = new JSONObject(intent.getStringExtra("json"));
-            if (!completeDownload) {
-                JSONArray array = object.getJSONArray("album_photos");
-                addAlbumToDatabase(array);
-            } else
-                addAlbumToDatabase(object);
+            addAlbumToDatabase(object);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -105,13 +99,6 @@ public class DownloadService {
         Thread thread = new Thread(threadGroup, new Runnable() {
             @Override
             public void run() {
-                if (!completeDownload) {
-                    if (helper.isImageExist(pin, imageData.getNum())) {
-                        downloaded++;
-                        setNextImageUrl();
-                        return;
-                    }
-                }
                 int count = 0;
                 URL url = null;
                 HttpURLConnection conection = null;

@@ -29,7 +29,7 @@ public class AddNewAlbum extends Fragment {
     public void getAlbum(View view) {
         if (albumPin.getText().toString().length() < 5)
             callback.showMessage("Enter valid pin");
-        else callback.getAlbum(albumPin.getText().toString(), true);
+        else callback.getAlbum(albumPin.getText().toString());
     }
 
     private Unbinder unbinder;
@@ -93,7 +93,7 @@ public class AddNewAlbum extends Fragment {
     }
 
     public interface NewAlbumCallback {
-        void getAlbum(String pin, boolean completed);
+        void getAlbum(String pin);
 
         void showMessage(String error);
 

@@ -67,6 +67,7 @@ public class HomeActivity extends AppCompatActivity
     private static final String CONTACT_US_STACK = "contact_us";
     private SharedPreferences preferences;
     private DownloadService downloadService;
+    private boolean gotoHome = false;
 
 
     @Override
@@ -90,11 +91,7 @@ public class HomeActivity extends AppCompatActivity
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (inStack(ADD_NEW_STACK))
-                    getSupportFragmentManager().beginTransaction()
-                            .replace(R.id.container, addNewAlbum)
-                            .addToBackStack(ADD_NEW_STACK)
-                            .commit();
+               addNewAlbum();
             }
         });
 
@@ -135,10 +132,31 @@ public class HomeActivity extends AppCompatActivity
         }
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if(gotoHome){
+            fab.show();
+            if (helper.getAllAlbums().moveToFirst()) {
+                try {
+                    getSupportFragmentManager().popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
+                    getSupportFragmentManager()
+                            .beginTransaction()
+                            .add(R.id.container, new AllAlbumDetails(), HOME_STACK)
+                            .commit();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here.
+        gotoHome = false;
+        fab.hide();
         int id = item.getItemId();
         switch (id) {
             case R.id.rearrange_albums:
@@ -158,6 +176,7 @@ public class HomeActivity extends AppCompatActivity
             case R.id.home:
                 if (helper.getAllAlbums().moveToFirst()) {
                     try {
+                        fab.show();
                         getSupportFragmentManager().popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
                         getSupportFragmentManager()
                                 .beginTransaction()
@@ -221,13 +240,12 @@ public class HomeActivity extends AppCompatActivity
     }
 
     @Override
-    public void getAlbum(final String pin, final boolean completed) {
+    public void getAlbum(final String pin) {
         Cursor cursor = helper.getAlbumDetailsById(pin);
-        if (cursor.moveToFirst() && completed) {
+        if (cursor.moveToFirst()) {
             showMessage("Album Already Exists!");
             return;
         }
-        helper.deleteAlbum(pin);
         Uri uri = Uri.parse(StaticData.GET_ALBUM);
         uri = uri.buildUpon().appendQueryParameter(StaticData.ALBUM_PIN, pin)
                 .appendQueryParameter("user_id", preferences.getString("uid", "")).build();
@@ -259,7 +277,6 @@ public class HomeActivity extends AppCompatActivity
                         Intent downloadIntent = new Intent(HomeActivity.this, DownloadService.class);
                         downloadIntent.putExtra("json", response);
                         downloadIntent.putExtra("pin", pin);
-                        downloadIntent.putExtra("complete_download", completed);
                         downloadService.startDownload(downloadIntent, HomeActivity.this);
 
                         IntentFilter statusIntentFilter = new IntentFilter(
@@ -352,6 +369,8 @@ public class HomeActivity extends AppCompatActivity
 
     @Override
     public void addNewAlbum() {
+        fab.hide();
+        gotoHome = false;
         if (inStack(ADD_NEW_STACK))
             getSupportFragmentManager().beginTransaction()
                     .replace(R.id.container, addNewAlbum)
@@ -376,6 +395,7 @@ public class HomeActivity extends AppCompatActivity
                     if (progress < 100) {
                         showMessage("Error in downloading some images..");
                     } else if (progress == 100) {
+                        gotoHome = true;
                         showMessage("Album Downloaded");
                     }
                     progressDialog.dismiss();

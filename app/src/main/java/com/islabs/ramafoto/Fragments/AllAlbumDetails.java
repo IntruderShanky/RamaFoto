@@ -104,16 +104,20 @@ public class AllAlbumDetails extends Fragment implements PagerCallback {
         dialog.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                helper.deleteAlbum(albumPin);
-                File file = new File(getContext().getFilesDir().getPath()
-                        .concat(File.separator).concat(albumPin));
-                deleteRecursive(file);
+                deleteAlbum(albumPin);
                 refreshPager();
             }
         });
         dialog.setNegativeButton("No", null);
         dialog.show();
 
+    }
+
+    void deleteAlbum(String albumPin) {
+        helper.deleteAlbum(albumPin);
+        File file = new File(getContext().getFilesDir().getPath()
+                .concat(File.separator).concat(albumPin));
+        deleteRecursive(file);
     }
 
     @Override
@@ -126,14 +130,15 @@ public class AllAlbumDetails extends Fragment implements PagerCallback {
             return;
         }
         Bitmap bitmap = BitmapFactory.decodeFile(image.getPath());
-        Uri uri = Uri.parse("https://play.google.com/store/apps/details?id=com.islabs.ramafoto");
         Uri imageUri = Uri.parse(MediaStore.Images.Media
                 .insertImage(getContext().getContentResolver(), bitmap, albumPin, "Cover Image"));
         Intent sharingIntent = new Intent(Intent.ACTION_SEND);
         sharingIntent.putExtra(Intent.EXTRA_STREAM, imageUri);
         sharingIntent.setType("image/png");
-        sharingIntent.putExtra(Intent.EXTRA_TEXT, "Download Rama Foto App to view my album "
-                + uri.toString() + "\nAlbum Pin: " + albumPin);
+        sharingIntent.putExtra(Intent.EXTRA_TEXT, "Download Rama Foto App to view my album." +
+                "\nAlbum Pin: " + albumPin +
+                "\nAvailable on Play Store(Android):  goo.gl/C5XJL7 " +
+                "\niTunes(iPhone): goo.gl/fk3S9C");
         getContext().startActivity(Intent.createChooser(sharingIntent, "Share Album"));
     }
 
@@ -159,7 +164,8 @@ public class AllAlbumDetails extends Fragment implements PagerCallback {
     @Override
     public void getAlbum(String pin) {
         if (NetworkConnection.isConnected(getContext())) {
-            callback.getAlbum(pin, false);
+            deleteAlbum(pin);
+            callback.getAlbum(pin);
         } else
             callback.showMessage("Internet connection unavailable..");
     }
@@ -176,7 +182,7 @@ public class AllAlbumDetails extends Fragment implements PagerCallback {
 
         void addNewAlbum();
 
-        void getAlbum(String pin, boolean completeDownload);
+        void getAlbum(String pin);
 
         void showMessage(String s);
     }
