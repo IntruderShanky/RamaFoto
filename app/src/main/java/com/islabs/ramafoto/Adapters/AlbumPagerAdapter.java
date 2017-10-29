@@ -60,7 +60,7 @@ public class AlbumPagerAdapter extends PagerAdapter {
         ImageView delete = (ImageView) view.findViewById(R.id.delete);
         ImageView share = (ImageView) view.findViewById(R.id.share);
         final TextView viewCount = (TextView) view.findViewById(R.id.view_count);
-        TextView eventName = (TextView) view.findViewById(R.id.event_name);
+        final TextView eventName = (TextView) view.findViewById(R.id.event_name);
         TextView eventDetails = (TextView) view.findViewById(R.id.event_date);
         ImageView photographerLogo = (ImageView) view.findViewById(R.id.photographer_logo);
         final Button viewAlbum = (Button) view.findViewById(R.id.view_album);
@@ -94,7 +94,7 @@ public class AlbumPagerAdapter extends PagerAdapter {
         share.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                pagerCallback.onShare(albumPin, image);
+                pagerCallback.onShare(albumPin, image, eventName.getText().toString());
             }
         });
         delete.setOnClickListener(new View.OnClickListener() {

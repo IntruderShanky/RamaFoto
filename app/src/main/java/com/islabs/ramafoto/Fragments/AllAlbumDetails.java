@@ -121,7 +121,7 @@ public class AllAlbumDetails extends Fragment implements PagerCallback {
     }
 
     @Override
-    public void onShare(String albumPin, Uri image) {
+    public void onShare(String albumPin, Uri image, String eventName) {
         if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED
                 && ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -135,10 +135,8 @@ public class AllAlbumDetails extends Fragment implements PagerCallback {
         Intent sharingIntent = new Intent(Intent.ACTION_SEND);
         sharingIntent.putExtra(Intent.EXTRA_STREAM, imageUri);
         sharingIntent.setType("image/png");
-        sharingIntent.putExtra(Intent.EXTRA_TEXT, "Download Rama Foto App to view my album." +
-                "\nAlbum Pin: " + albumPin +
-                "\nAvailable on Play Store(Android):  goo.gl/C5XJL7 " +
-                "\niTunes(iPhone): goo.gl/fk3S9C");
+        sharingIntent.putExtra(Intent.EXTRA_TEXT, "View my Photobook '" + eventName +
+                "' at RamaFoto. Download the app from ramaphotoexpress.com/app & use pin : " + albumPin);
         getContext().startActivity(Intent.createChooser(sharingIntent, "Share Album"));
     }
 
