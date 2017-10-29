@@ -46,7 +46,7 @@ public class AlbumViewActivity extends AppCompatActivity {
         }
     };
     private Handler handler = new Handler();
-    private float margin = .15f;
+    private float topMargin = 0, sideMargin = 0;
     private ImageView pauseVolume;
     private MediaPlayer mediaPlayer;
 
@@ -202,28 +202,26 @@ public class AlbumViewActivity extends AppCompatActivity {
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inPreferredConfig = Bitmap.Config.ARGB_8888;
         Bitmap bitmap = BitmapFactory.decodeFile(image, options);
+
         int bitmapHeight = bitmap.getHeight();
         int bitmapWidth = bitmap.getWidth();
 
         DisplayMetrics displayMetrics = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
-        float aspectRatio = ((float) displayMetrics.widthPixels) / ((float) displayMetrics.heightPixels);
-        int decreasedHeight = (int) (((float) displayMetrics.widthPixels) / aspectRatio);
-        float r = ((float) bitmapHeight) / ((float) bitmapWidth);
-        System.out.println("R " + r);
-        int rHeight = (int) (displayMetrics.widthPixels * r) / 2;
-        Log.d("LP WIDTH", displayMetrics.widthPixels + "");
-        Log.d("LP HEIGHT", rHeight + "");
-        Log.d("V WIDTH", bitmapWidth + "");
-        Log.d("V HEIGHT", bitmapHeight + "");
-        Log.d("ASPECT RATIO", aspectRatio + "");
-        Log.d("DECREASED HEIGHT", decreasedHeight + "");
 
-        float scaleFactor = (displayMetrics.heightPixels - rHeight) / 2;
-        margin = ((100 * scaleFactor) / displayMetrics.heightPixels) * .01f;
-        if (margin < 0)
-            margin = 0.0f;
-        System.out.println("Margin " + margin);
+        float ratio = ((float) bitmapHeight) / ((float) bitmapWidth);
+
+        if (bitmapHeight < bitmapWidth) {
+            sideMargin = 0;
+            int ratioHeight = (int) (displayMetrics.widthPixels * ratio) / 2;
+            float scaleFactor = (displayMetrics.heightPixels - ratioHeight) / 2;
+            topMargin = ((100 * scaleFactor) / displayMetrics.heightPixels) * .01f;
+        }else{
+            topMargin = 0;
+            int ratioWidth = (int) (displayMetrics.heightPixels * ratio);
+            float scaleFactor = (displayMetrics.widthPixels - ratioWidth) / 2;
+            sideMargin = ((100 * scaleFactor) / displayMetrics.widthPixels) * .01f;
+        }
     }
 
     /**
@@ -309,9 +307,8 @@ public class AlbumViewActivity extends AppCompatActivity {
     private class SizeChangedObserver implements AlbumView.SizeChangedObserver {
         @Override
         public void onSizeChanged(int w, int h) {
-            System.out.println(margin);
             albumView.setViewMode(AlbumView.SHOW_TWO_PAGES);
-            albumView.setMargins(0, margin, 0, margin);
+            albumView.setMargins(sideMargin, topMargin, sideMargin, topMargin);
         }
     }
 
