@@ -42,7 +42,6 @@ public class DownloadService {
         helper.open();
         this.context = context;
         assert intent != null;
-        System.out.println(intent.getStringExtra("json"));
         pin = intent.getStringExtra("pin");
         try {
             JSONObject object = new JSONObject(intent.getStringExtra("json"));
@@ -56,7 +55,6 @@ public class DownloadService {
         downloaded = 0;
         errorCount = 0;
         File app = new File(context.getFilesDir().toString().concat(File.separator).concat(pin));
-        System.out.println("FILE PATH: " + app.getPath());
         if (!app.exists()) {
             app.mkdir();
         }
@@ -107,7 +105,6 @@ public class DownloadService {
                     conection = (HttpURLConnection) url.openConnection();
                     conection.connect();
                     int lenghtOfFile = conection.getContentLength();
-                    System.out.println("Length: " + lenghtOfFile);
                     InputStream input = new BufferedInputStream(conection.getInputStream(), 8192);
 
                     OutputStream output = new FileOutputStream(imageData.getFilePath());
@@ -119,8 +116,6 @@ public class DownloadService {
                     }
 
                     downloaded++;
-                    System.out.println("Downloaded: " + downloaded + "  Total: " + total);
-
                     output.flush();
                     output.close();
                     input.close();
@@ -186,6 +181,7 @@ public class DownloadService {
             albumDetails.put(DatabaseHelper.PHOTOGRAPHER_LINK, object.getString("photographer_link"));
             albumDetails.put(DatabaseHelper.PHOTOGRAPHER_ADDRESS, object.getString("photographer_address"));
             albumDetails.put(DatabaseHelper.PHOTOGRAPHER_CONTACT, object.getString("photographer_contact"));
+            albumDetails.put(DatabaseHelper.PHOTOGRAPHER_ID, object.getString("photographer_id"));
             albumDetails.put(DatabaseHelper.INDEX, helper.getAllAlbums().getCount());
             helper.insertAlbum(DatabaseHelper.ALBUM_DETAILS, albumDetails);
         } catch (Exception e) {
@@ -231,7 +227,6 @@ public class DownloadService {
 
     private void sendProgress() {
         int progress = downloaded * 100 / total;
-        System.out.println("Progress: " + progress);
         Intent intent = new Intent(StaticData.BROADCAST_ACTION);
         intent.putExtra("progress", progress);
         intent.putExtra("pin", pin);

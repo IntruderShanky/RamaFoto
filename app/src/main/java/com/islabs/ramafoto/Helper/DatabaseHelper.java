@@ -45,8 +45,9 @@ public class DatabaseHelper {
     public static final String PHOTOGRAPHER_CONTACT = "photographer_contact";
     public static final String LAB_LINK = "lab_link";
     public static final String PHOTOGRAPHER_LINK = "photographer_link";
+    public static final String PHOTOGRAPHER_ID = "photographer_id";
 
-    private int DB_CURRENT_VERSION = 3;
+    private int DB_CURRENT_VERSION = 4;
 
     public DatabaseHelper(Context context) {
         this.helper = new SQLiteInnerHelper(context, DB_NAME, null, DB_CURRENT_VERSION);
@@ -93,7 +94,7 @@ public class DatabaseHelper {
             database.execSQL("delete from " + ALBUMS_TABLE + " where " + ALBUM_ID + "=" + albumPin + ";");
             database.execSQL("delete from " + ALBUM_DETAILS + " where " + ALBUM_ID + "=" + albumPin + ";");
             database.execSQL("update " + ALBUM_DETAILS + " set " + INDEX + " = " + INDEX + " - 1 where " + INDEX + ">" + index + ";");
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -147,7 +148,8 @@ public class DatabaseHelper {
                 + PHOTOGRAPHER_ADDRESS + " string not null, "
                 + PHOTOGRAPHER_LINK + " string not null, "
                 + LAB_LINK + " string not null, "
-                + PHOTOGRAPHER_CONTACT + " string not null);";
+                + PHOTOGRAPHER_CONTACT + " string not null,"
+                + PHOTOGRAPHER_ID + " string not null)";
 
 
         SQLiteInnerHelper(Context context, String name, SQLiteDatabase.CursorFactory factory, int version) {

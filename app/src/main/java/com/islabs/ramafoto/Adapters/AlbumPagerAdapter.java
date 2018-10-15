@@ -21,6 +21,7 @@ import android.widget.TextView;
 import com.bumptech.glide.Glide;
 import com.intrusoft.milano.Milano;
 import com.intrusoft.milano.OnRequestComplete;
+import com.islabs.ramafoto.Activity.PhotographerProfile;
 import com.islabs.ramafoto.Callbacks.PagerCallback;
 import com.islabs.ramafoto.Helper.DatabaseHelper;
 import com.islabs.ramafoto.R;
@@ -60,6 +61,9 @@ public class AlbumPagerAdapter extends PagerAdapter {
         ImageView coverPhoto = view.findViewById(R.id.album_cover);
         ImageView delete = view.findViewById(R.id.delete);
         ImageView share = view.findViewById(R.id.share);
+
+        Button openProfile = view.findViewById(R.id.open_profile);
+
         final TextView viewCount = view.findViewById(R.id.view_count);
         final TextView eventName = view.findViewById(R.id.event_name);
         TextView eventDetails = view.findViewById(R.id.event_date);
@@ -156,6 +160,15 @@ public class AlbumPagerAdapter extends PagerAdapter {
             public void onClick(View v) {
                 Intent intent = new Intent(Intent.ACTION_VIEW);
                 intent.setData(Uri.parse(cursor.getString(cursor.getColumnIndex(DatabaseHelper.PHOTOGRAPHER_LINK))));
+                context.startActivity(intent);
+            }
+        });
+
+        openProfile.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(context, PhotographerProfile.class);
+                intent.putExtra("id", cursor.getString(cursor.getColumnIndex(DatabaseHelper.PHOTOGRAPHER_ID)));
                 context.startActivity(intent);
             }
         });

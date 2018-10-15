@@ -19,26 +19,26 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name="com.islabs.ramafoto.Activity.MainActivity"
+            android:name=".Activity.MainActivity"
             android:screenOrientation="portrait" />
         <activity
-            android:name="com.islabs.ramafoto.Activity.HomeActivity"
+            android:name=".Activity.HomeActivity"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme">
-
-        </activity>
+            android:theme="@style/AppTheme"></activity>
         <activity
-            android:name="com.islabs.ramafoto.Activity.AlbumViewActivity"
+            android:name=".Activity.AlbumViewActivity"
             android:screenOrientation="sensorLandscape"
             android:theme="@style/AlbumViewTheme" />
         <activity
-            android:name="com.islabs.ramafoto.Activity.SplashScreen"
+            android:name=".Activity.SplashScreen"
             android:theme="@style/AlbumViewTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".Activity.PhotographerProfile"></activity>
     </application>
 
 </manifest>

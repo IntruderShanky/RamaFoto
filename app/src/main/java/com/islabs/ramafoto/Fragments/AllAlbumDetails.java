@@ -12,6 +12,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
@@ -34,9 +35,7 @@ public class AllAlbumDetails extends Fragment implements PagerCallback {
 
     private AllAlbumsDetailsCallback callback;
     private DatabaseHelper helper;
-    private AlbumPagerAdapter adapter;
     private ViewPager albumsPager;
-    private TextView addNewInfo;
 
     public AllAlbumDetails() {
     }
@@ -47,11 +46,11 @@ public class AllAlbumDetails extends Fragment implements PagerCallback {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_all_album_details, container, false);
-        albumsPager = (ViewPager) view.findViewById(R.id.all_albums_pager);
-        addNewInfo = (TextView) view.findViewById(R.id.add_album_info);
+        albumsPager = view.findViewById(R.id.all_albums_pager);
+        TextView addNewInfo = view.findViewById(R.id.add_album_info);
         albumsPager.setPageMargin(30);
         albumsPager.setPageTransformer(false, new StackTransformer(getContext()));
         albumsPager.setOffscreenPageLimit(3);
@@ -82,7 +81,7 @@ public class AllAlbumDetails extends Fragment implements PagerCallback {
     private void refreshPager() {
         System.out.println("in refress");
         Cursor cursor = helper.getAllAlbums();
-        adapter = new AlbumPagerAdapter(getContext(), cursor, AllAlbumDetails.this);
+        AlbumPagerAdapter adapter = new AlbumPagerAdapter(getContext(), cursor, AllAlbumDetails.this);
         albumsPager.setAdapter(adapter);
         callback.setToolbarTitle("My Albums", cursor.getCount() + " Albums");
         if (cursor.getCount() == 0)
@@ -98,6 +97,8 @@ public class AllAlbumDetails extends Fragment implements PagerCallback {
 
     @Override
     public void onAlbumDelete(final String albumPin) {
+        if(getContext() == null)
+            return;
         AlertDialog.Builder dialog = new AlertDialog.Builder(getContext());
         dialog.setTitle("Delete Album");
         dialog.setMessage("Do you want to delete this album?");
@@ -114,6 +115,8 @@ public class AllAlbumDetails extends Fragment implements PagerCallback {
     }
 
     void deleteAlbum(String albumPin) {
+        if(getContext()==null)
+            return;
         helper.deleteAlbum(albumPin);
         File file = new File(getContext().getFilesDir().getPath()
                 .concat(File.separator).concat(albumPin));
@@ -122,6 +125,8 @@ public class AllAlbumDetails extends Fragment implements PagerCallback {
 
     @Override
     public void onShare(String albumPin, Uri image, String eventName) {
+        if(getContext()==null)
+            return;
         if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED
                 && ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -142,6 +147,8 @@ public class AllAlbumDetails extends Fragment implements PagerCallback {
 
     @Override
     public void callPhotoStudio(String contactNumber) {
+        if(getContext() == null)
+            return;
         Intent callIntent = new Intent(Intent.ACTION_DIAL);
         callIntent.setData(Uri.parse("tel:" + contactNumber));
         getContext().startActivity(callIntent);
@@ -161,6 +168,8 @@ public class AllAlbumDetails extends Fragment implements PagerCallback {
 
     @Override
     public void getAlbum(String pin) {
+        if(getContext() == null)
+            return;
         if (NetworkConnection.isConnected(getContext())) {
             deleteAlbum(pin);
             callback.getAlbum(pin);
