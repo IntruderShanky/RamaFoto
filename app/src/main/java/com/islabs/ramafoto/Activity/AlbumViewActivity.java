@@ -2,6 +2,7 @@ package com.islabs.ramafoto.Activity;
 
 import android.animation.Animator;
 import android.animation.ObjectAnimator;
+import android.annotation.SuppressLint;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
@@ -9,7 +10,6 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.media.MediaPlayer;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.content.ContextCompat;
@@ -18,7 +18,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ImageView;
@@ -37,7 +36,6 @@ public class AlbumViewActivity extends AppCompatActivity {
     private AlbumView albumView;
     private DatabaseHelper helper;
     private RecyclerView galleryView;
-    private LinearLayoutManager linearLayoutManager;
     private ObjectAnimator fadeOut, fadeIn;
     private Runnable runnable = new Runnable() {
         @Override
@@ -53,9 +51,6 @@ public class AlbumViewActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-            getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
-        }
         setContentView(R.layout.activity_album_view);
         int index = 0;
         if (getLastNonConfigurationInstance() != null) {
@@ -83,8 +78,8 @@ public class AlbumViewActivity extends AppCompatActivity {
             return;
         }
 
-        galleryView = (RecyclerView) findViewById(R.id.gallery);
-        linearLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
+        galleryView = findViewById(R.id.gallery);
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
         galleryView.setLayoutManager(linearLayoutManager);
         galleryView.setHasFixedSize(true);
         galleryView.setAdapter(new GalleryAdapter(this, cursor, new GalleryListener() {
@@ -96,7 +91,7 @@ public class AlbumViewActivity extends AppCompatActivity {
                     albumView.setCurrentIndex((position / 2) + 1);
             }
         }));
-        albumView = (AlbumView) findViewById(R.id.album_view);
+        albumView = findViewById(R.id.album_view);
         albumDetails.moveToFirst();
         cursor.moveToFirst();
         String coverFile = getFilesDir().getPath().concat(File.separator).concat(albumId)
@@ -159,6 +154,7 @@ public class AlbumViewActivity extends AppCompatActivity {
 
         handler.postDelayed(runnable, 2000);
         findViewById(R.id.bottom_view).setOnTouchListener(new View.OnTouchListener() {
+            @SuppressLint("ClickableViewAccessibility")
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 if (event.getAction() == MotionEvent.ACTION_DOWN)
@@ -182,7 +178,7 @@ public class AlbumViewActivity extends AppCompatActivity {
         mediaPlayer.setLooping(true);
         mediaPlayer.start();
 
-        pauseVolume = (ImageView) findViewById(R.id.pause_volume);
+        pauseVolume = findViewById(R.id.pause_volume);
 //        pauseVolume.setVisibility(View.GONE);
         pauseVolume.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -216,7 +212,7 @@ public class AlbumViewActivity extends AppCompatActivity {
             int ratioHeight = (int) (displayMetrics.widthPixels * ratio) / 2;
             float scaleFactor = (displayMetrics.heightPixels - ratioHeight) / 2;
             topMargin = ((100 * scaleFactor) / displayMetrics.heightPixels) * .01f;
-        }else{
+        } else {
             topMargin = 0;
             int ratioWidth = (int) (displayMetrics.heightPixels * ratio);
             float scaleFactor = (displayMetrics.widthPixels - ratioWidth) / 2;
@@ -233,7 +229,7 @@ public class AlbumViewActivity extends AppCompatActivity {
         String cover, back;
         int pageCount;
 
-        public PageProvider(Cursor cursor, String cover, String back) {
+        PageProvider(Cursor cursor, String cover, String back) {
             this.cursor = cursor;
             this.cover = cover;
             this.back = back;
@@ -251,7 +247,7 @@ public class AlbumViewActivity extends AppCompatActivity {
         @Override
         public void updatePage(final AlbumPage page, final int width, final int height, final int index) {
             System.out.println(galleryView.getAdapter().getItemCount());
-            Bitmap front = null, back = null;
+            Bitmap front, back;
             boolean atLast = false;
             if (cursor.getCount() > index * 2)
                 cursor.moveToPosition(index * 2);

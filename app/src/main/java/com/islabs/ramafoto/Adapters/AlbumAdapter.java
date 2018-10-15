@@ -1,9 +1,10 @@
 package com.islabs.ramafoto.Adapters;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
-import android.support.v4.view.MotionEventCompat;
+import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -41,22 +42,24 @@ public class AlbumAdapter extends RecyclerView.Adapter<AlbumAdapter.ViewHolder> 
         helper = new DatabaseHelper(context);
     }
 
+    @NonNull
     @Override
-    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         return new ViewHolder(LayoutInflater.from(context).inflate(R.layout.album_view, parent, false));
     }
 
     @Override
-    public void onBindViewHolder(final ViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull final ViewHolder holder, int position) {
         cursor.moveToPosition(position);
         String pin = cursor.getString(cursor.getColumnIndex(DatabaseHelper.ALBUM_ID));
         Uri uri = Uri.parse(context.getFilesDir().getPath().concat(File.separator).concat(pin)
                 .concat(File.separator).concat("cover.jpg"));
         holder.albumCover.setImageURI(uri);
         holder.itemView.setOnTouchListener(new View.OnTouchListener() {
+            @SuppressLint("ClickableViewAccessibility")
             @Override
             public boolean onTouch(View v, MotionEvent event) {
-                if (MotionEventCompat.getActionMasked(event) == MotionEvent.ACTION_DOWN) {
+                if (event.getAction() == MotionEvent.ACTION_DOWN) {
                     mDragStartListener.onStartDrag(holder);
                 }
                 return false;

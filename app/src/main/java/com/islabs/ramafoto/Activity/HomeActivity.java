@@ -10,6 +10,7 @@ import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
@@ -55,9 +56,7 @@ public class HomeActivity extends AppCompatActivity
     private ProgressDialog progressDialog;
     private AddNewAlbum addNewAlbum;
     private RearrangeAlbums rearrangeAlbums;
-    private AllAlbumDetails allAlbumDetails;
     private ContactUs contactUs;
-    private Toolbar toolbar;
     private FAQs faQs;
     private AboutUs aboutUs;
     private FloatingActionButton fab;
@@ -74,38 +73,38 @@ public class HomeActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
-        rootLayout = (CoordinatorLayout) findViewById(R.id.root_layout);
-        toolbar = (Toolbar) findViewById(R.id.toolbar);
+        rootLayout = findViewById(R.id.root_layout);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         helper = new DatabaseHelper(this);
         preferences = getSharedPreferences(StaticData.PREF, MODE_PRIVATE);
         helper.open();
         progressDialog = new ProgressDialog(this, R.style.ProgressDialogTheme);
         rearrangeAlbums = new RearrangeAlbums();
-        allAlbumDetails = new AllAlbumDetails();
+        AllAlbumDetails allAlbumDetails = new AllAlbumDetails();
         addNewAlbum = new AddNewAlbum();
         contactUs = new ContactUs();
         faQs = new FAQs();
         aboutUs = new AboutUs();
-        fab = (FloatingActionButton) findViewById(R.id.add_new_album);
+        fab = findViewById(R.id.add_new_album);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-               addNewAlbum();
+                addNewAlbum();
             }
         });
 
         milanoBuilder = new Milano.Builder(this);
 
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        drawer.setDrawerListener(toggle);
+        drawer.addDrawerListener(toggle);
         toggle.syncState();
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        NavigationView navigationView = findViewById(R.id.nav_view);
         View header = navigationView.getHeaderView(0);
-        TextView userName = (TextView) header.findViewById(R.id.user_name);
-        TextView mobile = (TextView) header.findViewById(R.id.mobile);
+        TextView userName = header.findViewById(R.id.user_name);
+        TextView mobile = header.findViewById(R.id.mobile);
         userName.setText(preferences.getString("name", "Guest"));
         mobile.setText(preferences.getString("mobile", ""));
         navigationView.setNavigationItemSelectedListener(this);
@@ -114,7 +113,7 @@ public class HomeActivity extends AppCompatActivity
 
     @Override
     public void onBackPressed() {
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
@@ -135,7 +134,7 @@ public class HomeActivity extends AppCompatActivity
     @Override
     protected void onResume() {
         super.onResume();
-        if(gotoHome){
+        if (gotoHome) {
             fab.show();
             if (helper.getAllAlbums().moveToFirst()) {
                 try {
@@ -153,7 +152,7 @@ public class HomeActivity extends AppCompatActivity
 
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
-    public boolean onNavigationItemSelected(MenuItem item) {
+    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         // Handle navigation view item clicks here.
         gotoHome = false;
         fab.hide();
@@ -222,7 +221,7 @@ public class HomeActivity extends AppCompatActivity
 //
 //                break;
         }
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
@@ -355,7 +354,8 @@ public class HomeActivity extends AppCompatActivity
 
     @Override
     public void setToolbarTitle(String title, String subTitle) {
-        System.out.println(title);
+        if (getSupportActionBar() == null)
+            return;
         getSupportActionBar().setTitle(title);
         getSupportActionBar().setSubtitle(subTitle);
     }
@@ -379,6 +379,8 @@ public class HomeActivity extends AppCompatActivity
 
     @Override
     public void onAttachToHome(boolean attach) {
+        if (fab == null)
+            return;
         if (attach) fab.hide();
         else fab.show();
     }
@@ -386,7 +388,7 @@ public class HomeActivity extends AppCompatActivity
     class DownloadReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (intent.getAction().equals(StaticData.BROADCAST_ACTION)) {
+            if (intent.getAction() != null && intent.getAction().equals(StaticData.BROADCAST_ACTION)) {
                 int progress = intent.getIntExtra("progress", 0);
                 boolean completed = intent.getBooleanExtra("completed", false);
                 progressDialog.setProgress(progress);

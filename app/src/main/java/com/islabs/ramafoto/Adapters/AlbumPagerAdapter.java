@@ -1,11 +1,11 @@
 package com.islabs.ramafoto.Adapters;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.support.annotation.NonNull;
 import android.support.v4.view.PagerAdapter;
 import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
@@ -28,7 +28,6 @@ import com.islabs.ramafoto.Utils.NetworkConnection;
 import com.islabs.ramafoto.Utils.StaticData;
 
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
@@ -53,25 +52,27 @@ public class AlbumPagerAdapter extends PagerAdapter {
         helper.open();
     }
 
+    @SuppressLint("SetTextI18n")
+    @NonNull
     @Override
-    public Object instantiateItem(final ViewGroup container, int position) {
+    public Object instantiateItem(@NonNull final ViewGroup container, int position) {
         View view = LayoutInflater.from(context).inflate(R.layout.full_album_details, container, false);
-        ImageView coverPhoto = (ImageView) view.findViewById(R.id.album_cover);
-        ImageView delete = (ImageView) view.findViewById(R.id.delete);
-        ImageView share = (ImageView) view.findViewById(R.id.share);
-        final TextView viewCount = (TextView) view.findViewById(R.id.view_count);
-        final TextView eventName = (TextView) view.findViewById(R.id.event_name);
-        TextView eventDetails = (TextView) view.findViewById(R.id.event_date);
-        ImageView photographerLogo = (ImageView) view.findViewById(R.id.photographer_logo);
-        final Button viewAlbum = (Button) view.findViewById(R.id.view_album);
-        final Button downloadAgain = (Button) view.findViewById(R.id.redownload_album);
-        TextView labName = (TextView) view.findViewById(R.id.studio_name);
-        final TextView labContact = (TextView) view.findViewById(R.id.contact_number);
-        final TextView missing_error = (TextView) view.findViewById(R.id.image_missing_error);
-        TextView labAddress = (TextView) view.findViewById(R.id.studio_address);
-        TextView photographerAddress = (TextView) view.findViewById(R.id.photographer_address);
-        final TextView photographerContact = (TextView) view.findViewById(R.id.photographer_contact_number);
-        TextView photographerName = (TextView) view.findViewById(R.id.photographer_name);
+        ImageView coverPhoto = view.findViewById(R.id.album_cover);
+        ImageView delete = view.findViewById(R.id.delete);
+        ImageView share = view.findViewById(R.id.share);
+        final TextView viewCount = view.findViewById(R.id.view_count);
+        final TextView eventName = view.findViewById(R.id.event_name);
+        TextView eventDetails = view.findViewById(R.id.event_date);
+        ImageView photographerLogo = view.findViewById(R.id.photographer_logo);
+        final Button viewAlbum = view.findViewById(R.id.view_album);
+        final Button downloadAgain = view.findViewById(R.id.redownload_album);
+        TextView labName = view.findViewById(R.id.studio_name);
+        final TextView labContact = view.findViewById(R.id.contact_number);
+        final TextView missing_error = view.findViewById(R.id.image_missing_error);
+        TextView labAddress = view.findViewById(R.id.studio_address);
+        TextView photographerAddress = view.findViewById(R.id.photographer_address);
+        final TextView photographerContact = view.findViewById(R.id.photographer_contact_number);
+        TextView photographerName = view.findViewById(R.id.photographer_name);
         cursor.moveToPosition(position);
         labName.setText(cursor.getString(cursor.getColumnIndex(DatabaseHelper.LAB_NAME)));
         labContact.setText(cursor.getString(cursor.getColumnIndex(DatabaseHelper.LAB_CONTACT)));
@@ -160,6 +161,7 @@ public class AlbumPagerAdapter extends PagerAdapter {
         });
         if (NetworkConnection.isConnected(context))
             Milano.with(context).fromURL(uri.toString()).doGet().execute(new OnRequestComplete() {
+                @SuppressLint("SetTextI18n")
                 @Override
                 public void onSuccess(String response, int responseCode) {
                     try {
@@ -170,7 +172,7 @@ public class AlbumPagerAdapter extends PagerAdapter {
                         Cursor cursor1 = helper.getAlbumDetailsById(albumPin);
                         cursor1.moveToFirst();
                         int currentVersion = cursor1.getInt(cursor1.getColumnIndex(DatabaseHelper.ALBUM_VERSION));
-                        System.out.println(object.getInt("version") + "   Version  " + cursor.getInt(cursor.getColumnIndex(DatabaseHelper.ALBUM_VERSION))+  "   "+ currentVersion);
+                        System.out.println(object.getInt("version") + "   Version  " + cursor.getInt(cursor.getColumnIndex(DatabaseHelper.ALBUM_VERSION)) + "   " + currentVersion);
                         if (object.getInt("version") != currentVersion) {
                             missing_error.setVisibility(View.VISIBLE);
                             missing_error.setText("Album update available..");
@@ -226,12 +228,12 @@ public class AlbumPagerAdapter extends PagerAdapter {
     }
 
     @Override
-    public boolean isViewFromObject(View view, Object o) {
+    public boolean isViewFromObject(@NonNull View view, @NonNull Object o) {
         return view == o;
     }
 
     @Override
-    public void destroyItem(ViewGroup container, int position, Object object) {
+    public void destroyItem(@NonNull ViewGroup container, int position, @NonNull Object object) {
         container.removeView((LinearLayout) object);
     }
 
@@ -240,8 +242,8 @@ public class AlbumPagerAdapter extends PagerAdapter {
         return cursor.getCount();
     }
 
-    public void setCursor(Cursor cursor) {
-        this.cursor = cursor;
-        this.notifyDataSetChanged();
-    }
+//    public void setCursor(Cursor cursor) {
+//        this.cursor = cursor;
+//        this.notifyDataSetChanged();
+//    }
 }
