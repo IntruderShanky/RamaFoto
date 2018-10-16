@@ -12,6 +12,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
 import com.intrusoft.indicator.Flare;
 import com.intrusoft.milano.Milano;
 import com.intrusoft.milano.NetworkConnection;
@@ -24,6 +25,8 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import de.hdodenhof.circleimageview.CircleImageView;
 
 public class PhotographerProfile extends AppCompatActivity implements OnRequestComplete, View.OnClickListener {
 
@@ -61,6 +64,13 @@ public class PhotographerProfile extends AppCompatActivity implements OnRequestC
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setDisplayShowHomeEnabled(true);
         }
+
+        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onBackPressed();
+            }
+        });
 
         fetchProfile();
     }
@@ -100,15 +110,23 @@ public class PhotographerProfile extends AppCompatActivity implements OnRequestC
             photographerDescription.setText(result.getString("profile_description"));
 
             imageUrls = new ArrayList<>();
-            imageUrls.add(result.getString("portfolio_1"));
-            imageUrls.add(result.getString("portfolio_2"));
-            imageUrls.add(result.getString("portfolio_3"));
-            imageUrls.add(result.getString("portfolio_4"));
+            String url = result.getString("portfolio_1");
+            if (checkString(url)) imageUrls.add(url);
+            url = result.getString("portfolio_2");
+            if (checkString(url)) imageUrls.add(url);
+            url = result.getString("portfolio_3");
+            if (checkString(url)) imageUrls.add(url);
+            url = result.getString("portfolio_4");
+            if (checkString(url)) imageUrls.add(url);
 
-            PortfolioPagerAdapter portfolioPagerAdapter = new PortfolioPagerAdapter(this, imageUrls);
-            pager.setAdapter(portfolioPagerAdapter);
             pagerIndicator.setUpWithViewPager(pager);
 
+            if (imageUrls.size() > 0) {
+                PortfolioPagerAdapter portfolioPagerAdapter = new PortfolioPagerAdapter(this, imageUrls);
+                pager.setAdapter(portfolioPagerAdapter);
+            } else {
+                findViewById(R.id.portfolio_pager_parent).setVisibility(View.GONE);
+            }
             contact.setOnClickListener(this);
             email.setOnClickListener(this);
             whatsApp.setOnClickListener(this);
@@ -118,9 +136,33 @@ public class PhotographerProfile extends AppCompatActivity implements OnRequestC
             if (getSupportActionBar() != null)
                 getSupportActionBar().setTitle(name);
             findViewById(R.id.root_layout).setVisibility(View.VISIBLE);
+            setUpVisibility();
+
+            if(result.has("profile_photograph")){
+                String imageUrl = result.getString("profile_photograph");
+                if(checkString(imageUrl)){
+                    CircleImageView imageView = findViewById(R.id.photographer_image);
+                    Glide.with(this).load(result.getString("profile_photograph")).into(imageView);
+                    imageView.setVisibility(View.VISIBLE);
+                }
+            }
+
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    private void setUpVisibility() {
+        findViewById(R.id.portfolio_pager_parent).setVisibility(!imageUrls.isEmpty() ? View.VISIBLE : View.GONE);
+        youtube.setVisibility(checkString(youtubeLink) ? View.VISIBLE : View.GONE);
+        facebook.setVisibility(checkString(facebookLink) ? View.VISIBLE : View.GONE);
+        whatsApp.setVisibility(checkString(whatsAppNumber) ? View.VISIBLE : View.GONE);
+        instagram.setVisibility(checkString(instagramLink) ? View.VISIBLE : View.GONE);
+        email.setVisibility(checkString(emailAddress) ? View.VISIBLE : View.GONE);
+        contact.setVisibility(checkString(contactNumber) ? View.VISIBLE : View.GONE);
+        location.setVisibility(checkString(location.getText().toString()) ? View.VISIBLE : View.GONE);
+        photographerDescription.setVisibility(checkString(photographerDescription.getText().toString()) ? View.VISIBLE : View.GONE);
+        photographerName.setVisibility(checkString(photographerName.getText().toString()) ? View.VISIBLE : View.GONE);
     }
 
     @Override
@@ -164,5 +206,9 @@ public class PhotographerProfile extends AppCompatActivity implements OnRequestC
                 startActivity(Intent.createChooser(emailIntent, "Send email..."));
                 break;
         }
+    }
+
+    private boolean checkString(String str) {
+        return str != null && str.length() > 0 && !str.equals("null");
     }
 }
