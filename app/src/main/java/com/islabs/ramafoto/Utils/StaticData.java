@@ -6,7 +6,7 @@ package com.islabs.ramafoto.Utils;
 
 public class StaticData {
 
-    private static final String HOST = "http://ramaphotoexpress.com";
+    public static final String HOST = "http://ramaphotoexpress.com";
 
 
     public static final String GET_ALBUM = HOST.concat("/site/api");
@@ -19,4 +19,8 @@ public class StaticData {
     public static final String ALBUM_PIN = "album_pin";
     public static final String PREF = "user";
     public static final String BROADCAST_ACTION = "com.islabs.photobook.BROADCAST";
+
+    public static boolean checkString(String str) {
+        return str != null && str.length() > 0 && !str.equals("null");
+    }
 }

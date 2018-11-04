@@ -18,7 +18,7 @@
                                 <PersistentState>
                                   <option name="values">
                                     <map>
-                                      <entry key="url" value="jar:file:/E:/android/android-studio-ide-171.4443003-windows/android-studio/plugins/android/lib/android.jar!/images/material_design_icons/social/ic_location_city_black_24dp.xml" />
+                                      <entry key="url" value="jar:file:/E:/android/android-studio-ide-171.4443003-windows/android-studio/plugins/android/lib/android.jar!/images/material_design_icons/av/ic_play_circle_filled_black_24dp.xml" />
                                     </map>
                                   </option>
                                 </PersistentState>
@@ -28,12 +28,10 @@
                         </option>
                         <option name="values">
                           <map>
-                            <entry key="assetSourceType" value="FILE" />
                             <entry key="color" value="ffffff" />
-                            <entry key="outputName" value="ic_whatsapp_brands" />
+                            <entry key="outputName" value="ic_play_circle" />
                             <entry key="overrideSize" value="true" />
                             <entry key="sourceFile" value="C:\Users\Intruder Shanky\Downloads\whatsapp-brands.svg" />
-                            <entry key="width" value="20" />
                           </map>
                         </option>
                       </PersistentState>

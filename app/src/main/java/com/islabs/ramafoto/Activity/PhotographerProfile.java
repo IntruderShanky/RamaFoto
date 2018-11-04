@@ -3,17 +3,16 @@ package com.islabs.ramafoto.Activity;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
-import com.intrusoft.indicator.Flare;
 import com.intrusoft.milano.Milano;
 import com.intrusoft.milano.NetworkConnection;
 import com.intrusoft.milano.OnRequestComplete;
@@ -27,19 +26,40 @@ import java.util.ArrayList;
 import java.util.List;
 
 import de.hdodenhof.circleimageview.CircleImageView;
+import me.relex.circleindicator.CircleIndicator;
+
+import static com.islabs.ramafoto.Utils.StaticData.checkString;
 
 public class PhotographerProfile extends AppCompatActivity implements OnRequestComplete, View.OnClickListener {
 
     private Toolbar toolbar;
     private ViewPager pager;
-    private Flare pagerIndicator;
-    private LinearLayout youtube;
-    private TextView photographerName, photographerDescription, contact, email, location, whatsApp;
-    private ImageView facebook, instagram;
+    private CircleIndicator pagerIndicator;
+    private TextView photographerName, photographerDescription, contact, contact2, email, location;
+    private ImageView facebook, instagram, whatsApp, youtubeChannel;
 
     private List<String> imageUrls;
 
-    String contactNumber, whatsAppNumber, emailAddress, facebookLink, instagramLink, youtubeLink;
+    String contactNumber, contactNumber2, whatsAppNumber, emailAddress, facebookLink, instagramLink, youtubeLink, youtubeChannelLink;
+
+    private Runnable runnable = new Runnable() {
+        @Override
+        public void run() {
+            navigateNext();
+        }
+    };
+    private PortfolioPagerAdapter portfolioPagerAdapter;
+
+    private void navigateNext() {
+        if (pager.getCurrentItem() < portfolioPagerAdapter.getCount() - 1) {
+            pager.setCurrentItem(pager.getCurrentItem() + 1, true);
+        } else {
+            pager.setCurrentItem(0, true);
+        }
+        handler.postDelayed(runnable, 5000);
+    }
+
+    private Handler handler = new Handler();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,11 +69,12 @@ public class PhotographerProfile extends AppCompatActivity implements OnRequestC
         toolbar = findViewById(R.id.toolbar);
         pager = findViewById(R.id.profile_pager);
         pagerIndicator = findViewById(R.id.pager_indicator);
-        youtube = findViewById(R.id.open_youtube);
+        youtubeChannel = findViewById(R.id.youtube_channel);
         photographerName = findViewById(R.id.photographer_name);
         photographerDescription = findViewById(R.id.about_photographer);
         contact = findViewById(R.id.photographer_contact_number);
-        whatsApp = findViewById(R.id.photographer_mobile);
+        contact2 = findViewById(R.id.photographer_contact_number_2);
+        whatsApp = findViewById(R.id.whats_app);
         email = findViewById(R.id.photographer_email);
         location = findViewById(R.id.photographer_address);
         facebook = findViewById(R.id.facebook);
@@ -82,7 +103,7 @@ public class PhotographerProfile extends AppCompatActivity implements OnRequestC
         }
 
         String photographerId = getIntent().getStringExtra("id");
-
+//        String photographerId = "3";
         Milano.Builder builder = new Milano.Builder(this);
         builder.shouldDisplayDialog(true);
 
@@ -96,41 +117,50 @@ public class PhotographerProfile extends AppCompatActivity implements OnRequestC
             JSONObject result = new JSONObject(response);
 
             contactNumber = result.getString("photographer_contact");
+            contactNumber2 = result.getString("mobile");
             emailAddress = result.getString("email");
-            whatsAppNumber = result.getString("mobile");
+            whatsAppNumber = result.getString("whatsapp_number");
             facebookLink = result.getString("facebook_link");
             youtubeLink = result.getString("youtube_video_link");
             instagramLink = result.getString("instagram_link");
+            youtubeChannelLink = result.getString("youtube_channel_link");
+
             String name = result.getString("photographer_name");
             photographerName.setText(name);
             contact.setText(contactNumber);
+            contact2.setText(contactNumber2);
             location.setText(result.getString("photographer_address"));
             email.setText(emailAddress);
-            whatsApp.setText(whatsAppNumber);
-            photographerDescription.setText(result.getString("profile_description"));
+            photographerDescription.setText(result.getString("about"));
 
             imageUrls = new ArrayList<>();
             String url = result.getString("portfolio_1");
-            if (checkString(url)) imageUrls.add(url);
+            if (checkString(url))
+                imageUrls.add(url.startsWith("http") ? url : StaticData.HOST + url);
             url = result.getString("portfolio_2");
-            if (checkString(url)) imageUrls.add(url);
+            if (checkString(url))
+                imageUrls.add(url.startsWith("http") ? url : StaticData.HOST + url);
             url = result.getString("portfolio_3");
-            if (checkString(url)) imageUrls.add(url);
+            if (checkString(url))
+                imageUrls.add(url.startsWith("http") ? url : StaticData.HOST + url);
             url = result.getString("portfolio_4");
-            if (checkString(url)) imageUrls.add(url);
-
-            pagerIndicator.setUpWithViewPager(pager);
+            if (checkString(url))
+                imageUrls.add(url.startsWith("http") ? url : StaticData.HOST + url);
 
             if (imageUrls.size() > 0) {
-                PortfolioPagerAdapter portfolioPagerAdapter = new PortfolioPagerAdapter(this, imageUrls);
+                portfolioPagerAdapter = new PortfolioPagerAdapter(this, imageUrls, youtubeLink);
                 pager.setAdapter(portfolioPagerAdapter);
+
+                pagerIndicator.setViewPager(pager);
+                handler.postDelayed(runnable, 5000);
             } else {
                 findViewById(R.id.portfolio_pager_parent).setVisibility(View.GONE);
             }
             contact.setOnClickListener(this);
+            contact2.setOnClickListener(this);
             email.setOnClickListener(this);
             whatsApp.setOnClickListener(this);
-            youtube.setOnClickListener(this);
+            youtubeChannel.setOnClickListener(this);
             facebook.setOnClickListener(this);
             instagram.setOnClickListener(this);
             if (getSupportActionBar() != null)
@@ -138,12 +168,11 @@ public class PhotographerProfile extends AppCompatActivity implements OnRequestC
             findViewById(R.id.root_layout).setVisibility(View.VISIBLE);
             setUpVisibility();
 
-            if(result.has("profile_photograph")){
+            if (result.has("profile_photograph")) {
                 String imageUrl = result.getString("profile_photograph");
-                if(checkString(imageUrl)){
+                if (checkString(imageUrl)) {
                     CircleImageView imageView = findViewById(R.id.photographer_image);
                     Glide.with(this).load(result.getString("profile_photograph")).into(imageView);
-                    imageView.setVisibility(View.VISIBLE);
                 }
             }
 
@@ -154,12 +183,13 @@ public class PhotographerProfile extends AppCompatActivity implements OnRequestC
 
     private void setUpVisibility() {
         findViewById(R.id.portfolio_pager_parent).setVisibility(!imageUrls.isEmpty() ? View.VISIBLE : View.GONE);
-        youtube.setVisibility(checkString(youtubeLink) ? View.VISIBLE : View.GONE);
+        youtubeChannel.setVisibility(checkString(youtubeChannelLink) ? View.VISIBLE : View.GONE);
         facebook.setVisibility(checkString(facebookLink) ? View.VISIBLE : View.GONE);
         whatsApp.setVisibility(checkString(whatsAppNumber) ? View.VISIBLE : View.GONE);
         instagram.setVisibility(checkString(instagramLink) ? View.VISIBLE : View.GONE);
         email.setVisibility(checkString(emailAddress) ? View.VISIBLE : View.GONE);
         contact.setVisibility(checkString(contactNumber) ? View.VISIBLE : View.GONE);
+        contact2.setVisibility(checkString(contactNumber2) ? View.VISIBLE : View.GONE);
         location.setVisibility(checkString(location.getText().toString()) ? View.VISIBLE : View.GONE);
         photographerDescription.setVisibility(checkString(photographerDescription.getText().toString()) ? View.VISIBLE : View.GONE);
         photographerName.setVisibility(checkString(photographerName.getText().toString()) ? View.VISIBLE : View.GONE);
@@ -179,6 +209,11 @@ public class PhotographerProfile extends AppCompatActivity implements OnRequestC
                 intent.setData(Uri.parse("tel:" + contactNumber));
                 startActivity(intent);
                 break;
+            case R.id.photographer_contact_number_2:
+                intent = new Intent(Intent.ACTION_DIAL);
+                intent.setData(Uri.parse("tel:" + contactNumber2));
+                startActivity(intent);
+                break;
             case R.id.facebook:
                 intent = new Intent(Intent.ACTION_VIEW);
                 intent.setData(Uri.parse(facebookLink));
@@ -189,12 +224,12 @@ public class PhotographerProfile extends AppCompatActivity implements OnRequestC
                 intent.setData(Uri.parse(instagramLink));
                 startActivity(intent);
                 break;
-            case R.id.open_youtube:
+            case R.id.youtube_channel:
                 intent = new Intent(Intent.ACTION_VIEW);
-                intent.setData(Uri.parse(youtubeLink));
+                intent.setData(Uri.parse(youtubeChannelLink));
                 startActivity(intent);
                 break;
-            case R.id.photographer_mobile:
+            case R.id.whats_app:
                 intent = new Intent(Intent.ACTION_VIEW);
                 intent.setData(Uri.parse("https://api.whatsapp.com/send?phone=" + whatsAppNumber));
                 startActivity(intent);
@@ -208,7 +243,5 @@ public class PhotographerProfile extends AppCompatActivity implements OnRequestC
         }
     }
 
-    private boolean checkString(String str) {
-        return str != null && str.length() > 0 && !str.equals("null");
-    }
+
 }

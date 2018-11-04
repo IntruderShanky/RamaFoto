@@ -20,11 +20,12 @@
         android:theme="@style/AppTheme">
         <activity
             android:name=".Activity.MainActivity"
-            android:screenOrientation="portrait" />
+            android:screenOrientation="portrait">
+        </activity>
         <activity
             android:name=".Activity.HomeActivity"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme"></activity>
+            android:theme="@style/AppTheme" />
         <activity
             android:name=".Activity.AlbumViewActivity"
             android:screenOrientation="sensorLandscape"
@@ -37,8 +38,19 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:scheme="http"
+                    android:host="ramaphotoexpress.com" />
+            </intent-filter>
         </activity>
-        <activity android:name=".Activity.PhotographerProfile"></activity>
+        <activity android:name=".Activity.PhotographerProfile" />
+        <activity android:name=".Activity.PhotoView"></activity>
     </application>
 
 </manifest>
